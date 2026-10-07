@@ -58,6 +58,9 @@ class FirestoreRepository:
         ref.set({"caseCount": self._fs.Increment(1), "updatedAt": self._fs.SERVER_TIMESTAMP}, merge=True)
         return int(ref.get().to_dict().get("caseCount", 1))
 
+    def incr_global_daily_cases(self, day: str) -> int:
+        return self.incr_daily_cases("__global__", day)
+
     def add_audit(self, entry: Doc) -> None:
         self._db.collection("auditLogs").add(entry)
 

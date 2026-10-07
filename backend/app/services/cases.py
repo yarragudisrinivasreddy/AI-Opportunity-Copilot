@@ -62,6 +62,7 @@ class Services:
     providers: list[Provider]
     seeded_proposals: dict[str, dict]  # provider_id -> {"structured": Proposal, "rawText": str}
     daily_case_cap: int = 5
+    global_daily_case_cap: int = 40
     uploads_enabled: bool = True
 
 
@@ -104,6 +105,8 @@ class CaseService:
     # ---------- lifecycle ----------
     def create_case(self, uid: str, vertical: str = "manufacturing") -> dict:
         day = dt.date.today().isoformat()
+        if self.s.repo.incr_global_daily_cases(day) > self.s.global_daily_case_cap:
+            raise QuotaExceeded("the service is at capacity today; use the sample case")
         if self.s.repo.incr_daily_cases(uid, day) > self.s.daily_case_cap:
             raise QuotaExceeded("daily case limit reached; use the sample case")
         case = {

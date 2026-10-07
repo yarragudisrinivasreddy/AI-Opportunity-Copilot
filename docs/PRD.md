@@ -148,7 +148,7 @@ Open link (no login required for sample case, or Firebase anonymous auth) → sa
 | FR-19 | Deletion | User can delete a case and all subcollections and stored media |
 | FR-20 | Audit log | Create, view, share, delete and evaluate events are logged without storing PII |
 | FR-21 | Accessibility | Keyboard navigable, visible focus, labelled controls, sufficient contrast, text alternative for the process map |
-| FR-22 | Health endpoint | `/healthz` returns status without exposing secrets |
+| FR-22 | Health endpoint | `/api/health` (and `/health`) returns status without exposing secrets. Prefer `/api/health` on Cloud Run / Hosting; bare `/healthz` can be swallowed by the Cloud Run edge |
 
 ---
 
@@ -443,7 +443,7 @@ rateLimits/{uid_date}      caseCount, updatedAt
 | GET | `/api/cases/{id}` | Read case state |
 | DELETE | `/api/cases/{id}` | Delete case and media |
 | GET | `/api/sample` | Load sample case fixtures |
-| GET | `/healthz` | Health check |
+| GET | `/api/health` | Health check (also `/health`; avoid relying on `/healthz` behind Cloud Run) |
 
 Cross-cutting: Firebase ID-token verification and App Check on every route; per-user and per-IP rate limits; request size caps; structured JSON logs with no PII; security headers set in `after_request` only (do not add a `before_request` origin check that can block evaluator traffic); CORS restricted to the Hosting origin.
 

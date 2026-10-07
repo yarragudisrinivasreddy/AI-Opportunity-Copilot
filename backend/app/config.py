@@ -26,7 +26,10 @@ class Settings(BaseSettings):
 
     # TBD values from PRD section 30; defaults are conservative placeholders.
     daily_case_cap: int = 5
+    # Shared across all users (anonymous IDs can be minted forever). Hard spend brake.
+    global_daily_case_cap: int = 40
     rate_limit_per_minute: int = 30
+    ip_rate_limit_per_minute: int = 60
     max_upload_files: int = 6
     # When false, photo/video upload is rejected; text descriptions still work.
     # Keep false in production until Cloud Vision + DLP are verified on real frames.

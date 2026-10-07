@@ -17,6 +17,8 @@ from app.llm.client import ImagePart, LLMError, Part, T
 
 logger = logging.getLogger("app.llm.vertex")
 
+# JSON-Schema *keywords* Vertex rejects. Never strip these when they are
+# property names under "properties" (e.g. a field called "title").
 _STRIP_KEYS = frozenset({
     "minLength", "maxLength", "minItems", "maxItems",
     "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum",
@@ -28,13 +30,13 @@ def vertex_response_schema(model: type[BaseModel]) -> dict[str, Any]:
     """JSON Schema Vertex accepts for response_schema (constraints validated in code)."""
     raw = model.model_json_schema()
 
-    def strip(obj: Any) -> Any:
+    def strip(obj: Any, parent_key: str | None = None) -> Any:
         if isinstance(obj, dict):
             out: dict[str, Any] = {}
             for k, v in obj.items():
-                if k in _STRIP_KEYS:
+                if parent_key != "properties" and k in _STRIP_KEYS:
                     continue
-                out[k] = strip(v)
+                out[k] = strip(v, k)
             if "anyOf" in out:
                 non_null = [x for x in out["anyOf"] if not (isinstance(x, dict) and x.get("type") == "null")]
                 if len(non_null) == 1:
@@ -42,10 +44,10 @@ def vertex_response_schema(model: type[BaseModel]) -> dict[str, Any]:
                     for k, v in out.items():
                         if k != "anyOf":
                             merged[k] = v
-                    return strip(merged)
+                    return strip(merged, parent_key)
             return out
         if isinstance(obj, list):
-            return [strip(x) for x in obj]
+            return [strip(x, parent_key) for x in obj]
         return obj
 
     schema = strip(raw)

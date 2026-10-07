@@ -6,23 +6,21 @@ You are continuing a hackathon build. Deadline: **submit Sat 17 Oct 2026**, hard
 
 | Area | State | Trust |
 |---|---|---|
-| Deterministic core (rubric, ROI, scorer, ranking, injection scan, text PII, privacy pipeline) | Implemented | **Tested** (offline pytest green, incl. uploads kill switch + Vertex schema helper) |
-| Four agents + structured-output plumbing | Implemented | Fake LLM in tests; **VisionProcessAgent smoke OK** on live Vertex (`gemini-2.5-flash` / `us-central1`) after loosening `response_schema` |
-| Case workflow, gating, ownership, audit, rate limits | Implemented | Tested through the HTTP API |
-| Frontend (5 screens, sample mode, accessible markup) | Implemented | `npm run build` OK; uploads UI respects `/api/config`. **Not tested** with real Firebase auth or on a phone |
-| Vertex Gemini client (`app/llm/vertex.py`) | Implemented | **Verified** via `scripts.smoke_vertex` (2026-10-07). Model: set `GEMINI_MODEL=gemini-2.5-flash` (3.5 not available on this project yet). Schema constraints stripped for API, Pydantic still validates |
-| Firestore / GCS repos (`app/repo/firestore.py`) | Written | Native DB **`copilot`** created in `us-central1`; GCS bucket `y-srinivasreddy-copilot-media` created. Client accepts `FIRESTORE_DATABASE`. **Live read/write UNVERIFIED** until Cloud Run |
-| Cloud Vision face detection, Cloud DLP image redaction | Written | **UNVERIFIED**; keep `UPLOADS_ENABLED=false` in production until verified |
-| Uploads kill switch | Implemented | API 403 + `/api/config` + frontend hide file input when disabled |
-| Firebase Auth (anonymous) + ID-token verification | Configured | Firebase on `y-srinivasreddy`; web app created; **Anonymous enabled**. Live ID-token path still needs an end-to-end case run |
-| Dockerfile, firebase.json, firestore.rules | Verified | Cloud Build OK; Hosting + Firestore rules deployed to `copilot` DB |
-| Cloud Run API | Deployed | `https://opportunity-copilot-api-redqkgtx4a-uc.a.run.app` — `/api/health`, `/api/sample`, `/api/config` OK; `UPLOADS_ENABLED=false` |
-| Firebase Hosting | Deployed | https://y-srinivasreddy.web.app (and `.firebaseapp.com`) — `/api/health` + `/api/sample` via rewrite OK |
-| GitHub | Pushed | https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main`) |
-| Sample case fixture | Generated with the **fake** LLM | Walkthrough only; regenerate with Gemini |
-| GCP project `y-srinivasreddy` | Linked | Billing linked; APIs enabled; SA `copilot-api` + IAM for Vertex/Firestore/DLP/GCS |
-
-First hour: run `pytest`, then `python -m scripts.smoke_vertex` with real credentials, and fix whatever drifted. Do not assume anything in the UNVERIFIED rows works.
+| Deterministic core (rubric, ROI, scorer, ranking, injection scan, text PII, privacy pipeline) | Implemented | **Tested** (offline pytest green, incl. uploads kill switch, global case cap, Vertex schema helper) |
+| Four agents + structured-output plumbing | Implemented | Fake LLM in tests; **VisionProcessAgent smoke OK** on live Vertex (`gemini-2.5-flash` / `us-central1`) |
+| Case workflow, gating, ownership, audit, rate limits | Implemented | Per-UID + **global** daily case caps; per-UID + **per-IP** per-minute limits |
+| Frontend (5 screens, sample mode, accessible markup) | Implemented | Hosting live; sample case works. Phone / full a11y audit still open |
+| Vertex Gemini client (`app/llm/vertex.py`) | Implemented | **Verified** (`scripts.smoke_vertex`, 2026-10-07). `GEMINI_MODEL=gemini-2.5-flash`. API gets a loosened JSON schema (length/`minItems` stripped + `$ref` inlined); **Pydantic still validates** the response |
+| Firestore / GCS | Implemented | Native DB **`copilot`** (`us-central1`); `FirestoreRepository(..., database=settings.firestore_database)`; Cloud Run env `FIRESTORE_DATABASE=copilot`; `firebase.json` `"database": "copilot"`. GCS bucket `y-srinivasreddy-copilot-media` |
+| Cloud Vision / Cloud DLP | Written | **UNVERIFIED** on real frames → production `UPLOADS_ENABLED=false` (text-only) |
+| Uploads kill switch | Implemented | API 403 + `/api/config` + frontend hides file input |
+| Firebase Auth (anonymous) | Configured | Anonymous enabled; App Check **not** enforced yet (`ENFORCE_APP_CHECK=false` until registered) |
+| Dockerfile | Verified | Cloud Build succeeded for Cloud Run |
+| Cloud Run API | Deployed | https://opportunity-copilot-api-redqkgtx4a-uc.a.run.app — use **`/api/health`** (not bare `/healthz`) |
+| Firebase Hosting | Deployed | https://y-srinivasreddy.web.app — rewrite to Cloud Run; sample case OK |
+| GitHub | Pushed | https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main` only) |
+| Sample case fixture | Fake LLM | Walkthrough only |
+| Budget / Vertex quota | Partial | Billing linked; **budget alert + Vertex quota cap still TODO before submit** |
 
 ## Commands
 
@@ -40,8 +38,8 @@ cd backend && python scripts/e2e_browser.py          # browser smoke test; needs
 1. Routes (`api/routes.py`) are thin; rules live in `services/cases.py` and `core/`.
 2. Agents depend on the `LLMClient` Protocol (`llm/client.py`), never on an SDK. `FakeLLM` for tests, `VertexGeminiClient` for real.
 3. LLMs interpret and explain; **code decides** (rubric recommendation, bid scores, ranking, ROI ranges).
-4. All user media is sanitised before storage or any model call; failures reject the media.
-5. All persistence goes through `Repository` / `MediaStore` Protocols (in-memory for tests, Firestore/GCS for production).
+4. All user media is sanitised before storage or any model call; failures reject the media. Live demo: media upload off until Vision/DLP verified.
+5. All persistence goes through `Repository` / `MediaStore` Protocols (in-memory for tests, Firestore DB `copilot` / GCS for production).
 
 ## Non-negotiables (do not "improve" these away)
 
@@ -58,18 +56,19 @@ cd backend && python scripts/e2e_browser.py          # browser smoke test; needs
 
 ## Deviations from the PRD (decided during the build)
 
-1. **No Google ADK yet.** Orchestration is plain Python (`CaseService` + agents). The PRD mentions ADK for the technical-merit story. Decide by 8 Oct: wrap the existing agents as ADK agents (verify the current ADK API first) or keep plain Python and describe it honestly. Do not rewrite the core to fit ADK.
-2. **Firestore rules are deny-all.** The browser never touches Firestore; Cloud Run uses Admin credentials. Simpler and safer than owner rules.
-3. **Originals are never stored.** Sanitisation happens in memory; only sanitised frames reach storage. (PRD described a short-TTL temp bucket.)
+1. **No Google ADK.** Orchestration is plain Python (`CaseService` + agents). Describe honestly in the deck.
+2. **Firestore rules are deny-all.** The browser never touches Firestore; Cloud Run uses Admin credentials. DB id is **`copilot`** (not `(default)`, which is Datastore-mode on this project).
+3. **Originals are never stored.** Sanitisation happens in memory; only sanitised frames reach storage.
 4. **Vision agent fallback:** after one retry, ungrounded "observations" are downgraded to "assumption" instead of failing.
 5. **Follow-up questions use fixed wording;** the agent only decides which facts are missing.
-6. **Expected outcomes come from code** (`core/roi.py` planning bands), not from the model. Review the band values; they are placeholders.
+6. **Expected outcomes come from code** (`core/roi.py` planning bands), not from the model.
 7. **Flagged proposals are scored on their remaining content** and shown with a warning; they are not penalised.
 8. When target weeks/budget are not supplied, they are inferred from the proposals and the evaluation carries `*_inferred` flags (shown in the UI).
+9. **Health URL:** prefer `/api/health` for uptime and gates (Cloud Run edge can swallow `/healthz`).
 
 ## Known gaps (highest value first)
 
-See `docs/TASKS.md` for the full list with owners and dates. Top items: verify Vertex wiring and prompts on real images; deploy; verify Cloud Vision/DLP; build the held-out benchmark data; add weight sliders; accessibility audit; deck and video.
+See `docs/TASKS.md`. Top items: budget alert + Vertex quota; live text case through evaluation; Vision/DLP or keep text-only and align deck; App Check; held-out benchmark data; team lock Sun 11 Oct; accessibility audit; deck and video.
 
 ## How to work
 

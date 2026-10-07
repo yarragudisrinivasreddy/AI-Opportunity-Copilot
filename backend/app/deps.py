@@ -17,6 +17,7 @@ class AppContext:
     settings: Settings
     cases: CaseService
     limiter: SlidingWindowLimiter
+    ip_limiter: SlidingWindowLimiter
     llm: LLMClient
 
 
@@ -70,7 +71,13 @@ def build_context(settings: Settings, llm: LLMClient | None = None, repo=None, m
         detector=detector, redactor=redactor,
         providers=loader.providers(), seeded_proposals=loader.seeded_proposals(),
         daily_case_cap=settings.daily_case_cap,
+        global_daily_case_cap=settings.global_daily_case_cap,
         uploads_enabled=settings.uploads_enabled,
     )
-    return AppContext(settings=settings, cases=CaseService(services),
-                      limiter=SlidingWindowLimiter(settings.rate_limit_per_minute), llm=llm)
+    return AppContext(
+        settings=settings,
+        cases=CaseService(services),
+        limiter=SlidingWindowLimiter(settings.rate_limit_per_minute),
+        ip_limiter=SlidingWindowLimiter(settings.ip_rate_limit_per_minute),
+        llm=llm,
+    )

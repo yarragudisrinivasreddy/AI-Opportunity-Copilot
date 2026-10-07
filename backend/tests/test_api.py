@@ -122,6 +122,14 @@ def test_daily_case_cap(client):
     assert client.post("/api/cases", json={}, headers=BOB).status_code == 201
 
 
+def test_global_daily_case_cap():
+    s = Settings(env="test", daily_case_cap=100, global_daily_case_cap=2, rate_limit_per_minute=1000)
+    ctx = build_context(s)
+    c = TestClient(create_app(s, ctx))
+    assert new_case(c) and new_case(c, headers=BOB)
+    assert c.post("/api/cases", json={}, headers={"X-Dev-User": "carol"}).status_code == 429
+
+
 def test_rate_limit():
     s = Settings(env="test", rate_limit_per_minute=3)
     c = TestClient(create_app(s, build_context(s)))
@@ -181,6 +189,6 @@ def test_docs_disabled_in_production():
                  gemini_model="m", media_bucket="b")
     from fastapi import FastAPI
     from app.deps import AppContext
-    stub = AppContext(settings=s, cases=None, limiter=None, llm=None)  # type: ignore[arg-type]
+    stub = AppContext(settings=s, cases=None, limiter=None, ip_limiter=None, llm=None)  # type: ignore[arg-type]
     app = create_app(s, stub)
     assert app.docs_url is None and app.openapi_url is None
