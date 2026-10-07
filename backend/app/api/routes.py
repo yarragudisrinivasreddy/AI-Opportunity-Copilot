@@ -6,7 +6,7 @@ from app.core.privacy import MAX_IMAGE_BYTES, MAX_VIDEO_BYTES
 from app.fixtures import loader
 from app.schemas.process import Process
 from app.schemas.proposal import Weights
-from app.security import User, authenticate
+from app.security import User, authenticate, client_ip
 
 router = APIRouter(prefix="/api")
 
@@ -18,6 +18,7 @@ def ctx(request: Request):
 def current_user(request: Request, c=Depends(ctx)) -> User:
     user = authenticate(request, c.settings)
     c.limiter.check(user.uid)
+    c.ip_limiter.check(client_ip(request))
     return user
 
 

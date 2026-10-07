@@ -4,7 +4,7 @@ Status of the PRD threat model (section 22). "Verified" means covered by an auto
 
 | # | Threat | Control | Status |
 |---|---|---|---|
-| T1 | Account takeover | Firebase Auth anonymous tokens; optional App Check (`ENFORCE_APP_CHECK`) | DRAFT: unverified live |
+| T1 | Account takeover / denial-of-wallet | Firebase Auth anonymous tokens; optional App Check (`ENFORCE_APP_CHECK`); per-UID + **global** daily case caps; per-UID + **per-IP** per-minute limits; set a GCP **budget alert** and Vertex quota before submit | PARTIAL: caps in code; App Check off until registered; budget alert TODO |
 | T2 | Cross-user access | Ownership check on every case route; foreign and missing ids both 404; Firestore deny-all | Verified (`test_other_users_cannot_see_or_touch_a_case`) |
 | T3 | Injection via proposals | Scan + strip, isolated extraction, code scoring, citation validation | Verified on dev attack set; **held-out set needed** |
 | T4 | Injection via text in images/docs | Untrusted-data framing; schema-constrained output | TODO: add red-team images |

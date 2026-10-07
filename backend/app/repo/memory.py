@@ -58,6 +58,9 @@ class InMemoryRepository:
             self.daily[(uid, day)] = self.daily.get((uid, day), 0) + 1
             return self.daily[(uid, day)]
 
+    def incr_global_daily_cases(self, day: str) -> int:
+        return self.incr_daily_cases("__global__", day)
+
     def add_audit(self, entry: Doc) -> None:
         with self._lock:
             self.audit.append(copy.deepcopy(entry))

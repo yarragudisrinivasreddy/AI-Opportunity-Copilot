@@ -6,7 +6,7 @@ Built for the Google Cloud x Hack2skill **AI Builder Cup 2026**. Theme preferenc
 
 ## What it does
 
-1. **SHOW**: photo, short video, or a text description of a manual process. Faces are blurred and sensitive text is masked before any model sees it.
+1. **SHOW**: a text description of a manual process (photo/video upload is off in the live demo until Cloud Vision + DLP are verified on real frames; when enabled, faces are blurred and sensitive text is masked before any model sees it).
 2. **UNDERSTAND**: Gemini reconstructs the process; every step is labelled *observation* (seen) or *assumption* (inferred). The user confirms or edits, then answers only the questions the system needs.
 3. **DISCOVER**: up to three AI opportunities scored on a transparent rubric (enums, not made-up numbers). It can say "not a strong AI candidate" or "use a simple rule-based workflow".
 4. **BRIEF**: a structured, build-ready brief with human-in-the-loop points, risks, phases and assumptions. Effort estimates are ranges with stated assumptions.
@@ -58,8 +58,15 @@ frontend/src/          React + Vite UI
 docs/                  PRD and engineering docs (start with CURSOR_HANDOFF.md)
 ```
 
+## Live demo
+
+- App: https://y-srinivasreddy.web.app
+- Health: https://y-srinivasreddy.web.app/api/health
+- Photo/video upload is currently **disabled** (`UPLOADS_ENABLED=false`). Use a text description or the sample case.
+
 ## Honest limitations
 
 - Providers and proposals are simulated and labelled as such.
 - The sample case was produced with an offline fake model; it is a walkthrough, not a benchmark.
 - Benchmark numbers must come from `python -m eval.run ... --llm vertex`; fake-LLM numbers are marked not reportable.
+- Live media privacy (Vision face blur + DLP image redaction) is implemented but not yet verified on real frames; do not claim it in the deck until that check passes.

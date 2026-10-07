@@ -34,4 +34,6 @@ cd .. && firebase deploy --only hosting,firestore
 ```
 Before deploying, replace `REPLACE_WITH_CLOUD_RUN_REGION` in `firebase.json`.
 
-Checklist: budget alert set; min instances decided (cold starts vs cost) and a plan to keep the service alive through 6 Nov; incognito test of the live URL; confirm no secret in the repo; verify the pushed remote (single branch, small size) by cloning it fresh.
+Checklist: **budget alert** set in Billing; **Vertex AI quota** capped in IAM Quotas; `GLOBAL_DAILY_CASE_CAP` / `DAILY_CASE_CAP` set; App Check registered then `ENFORCE_APP_CHECK=true`; min instances decided (cold starts vs cost) through 6 Nov; incognito CSP check on Hosting; confirm no secret in the repo; fresh-clone verify (single branch, small size, `pytest` + `npm run build`).
+
+Uptime / gate health URL: `https://HOST/api/health` (not `/healthz`).

@@ -42,6 +42,16 @@ def _verify_app_check(token: str | None) -> None:  # pragma: no cover - needs li
         raise HTTPException(status_code=401, detail="invalid app check token") from exc
 
 
+def client_ip(request: Request) -> str:
+    """Best-effort client IP. Cloud Run sets X-Forwarded-For."""
+    xff = request.headers.get("x-forwarded-for", "").strip()
+    if xff:
+        return xff.split(",")[0].strip()[:64] or "unknown"
+    if request.client and request.client.host:
+        return request.client.host[:64]
+    return "unknown"
+
+
 def authenticate(request: Request, settings: Settings) -> User:
     if settings.auth_mode == "dev":
         uid = request.headers.get("X-Dev-User", "").strip()
