@@ -55,6 +55,12 @@ def sample() -> dict:
     return loader.sample_case()
 
 
+@router.get("/health")
+def api_health(c=Depends(ctx)) -> dict:
+    """Health under /api so Hosting rewrites and Cloud Run both reach it."""
+    return {"status": "ok", "env": c.settings.env}
+
+
 @router.get("/config")
 def public_config(c=Depends(ctx)) -> dict:
     """Public client config. No auth."""

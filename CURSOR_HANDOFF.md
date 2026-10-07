@@ -15,7 +15,8 @@ You are continuing a hackathon build. Deadline: **submit Sat 17 Oct 2026**, hard
 | Cloud Vision face detection, Cloud DLP image redaction | Written | **UNVERIFIED**; keep `UPLOADS_ENABLED=false` in production until verified |
 | Uploads kill switch | Implemented | API 403 + `/api/config` + frontend hide file input when disabled |
 | Firebase Auth (anonymous) + ID-token verification | Written | **UNVERIFIED** — Firebase CLI login / web app config still needed |
-| Dockerfile, firebase.json, firestore.rules | Written | **UNVERIFIED** (Cloud Build on first `gcloud run deploy --source`) |
+| Dockerfile, firebase.json, firestore.rules | Written | **Dockerfile verified** via Cloud Build (`opportunity-copilot-api` live). Hosting/rules still need Firebase login |
+| Cloud Run API | Deployed | `https://opportunity-copilot-api-redqkgtx4a-uc.a.run.app` — `/api/health`, `/api/sample`, `/api/config` OK; `UPLOADS_ENABLED=false`. Use `/api/health` (bare `/healthz` is swallowed by Cloud Run edge) |
 | Sample case fixture | Generated with the **fake** LLM | Walkthrough only; regenerate with Gemini |
 | GCP project `y-srinivasreddy` | Linked | Billing linked; APIs enabled; SA `copilot-api` + IAM for Vertex/Firestore/DLP/GCS |
 
