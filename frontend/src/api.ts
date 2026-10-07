@@ -5,8 +5,8 @@ export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
 
-async function call<T>(method: string, path: string, body?: unknown, form?: FormData): Promise<T> {
-  const headers: Record<string, string> = { ...(await authHeaders()) };
+async function call<T>(method: string, path: string, body?: unknown, form?: FormData, opts?: { auth?: boolean }): Promise<T> {
+  const headers: Record<string, string> = opts?.auth === false ? {} : { ...(await authHeaders()) };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const res = await fetch(`/api${path}`, { method, headers, body: form ?? (body !== undefined ? JSON.stringify(body) : undefined) });
   if (res.status === 204) return undefined as T;
@@ -16,8 +16,9 @@ async function call<T>(method: string, path: string, body?: unknown, form?: Form
 }
 
 export const api = {
-  sample: () => call<any>("GET", "/sample"),
-  config: () => call<{ uploadsEnabled: boolean; uploadsDisabledMessage: string }>("GET", "/config"),
+  // Public: no auth — sample must work even when anonymous sign-in / storage is blocked.
+  sample: () => call<any>("GET", "/sample", undefined, undefined, { auth: false }),
+  config: () => call<{ uploadsEnabled: boolean; uploadsDisabledMessage: string }>("GET", "/config", undefined, undefined, { auth: false }),
   createCase: () => call<{ id: string }>("POST", "/cases", {}),
   upload: (id: string, file: File) => { const f = new FormData(); f.append("file", file); return call<{ frames: number; privacy: string[] }>("POST", `/cases/${id}/media`, undefined, f); },
   describe: (id: string, text: string) => call<void>("PUT", `/cases/${id}/description`, { text }),

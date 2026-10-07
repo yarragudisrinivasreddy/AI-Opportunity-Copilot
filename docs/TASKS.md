@@ -30,7 +30,8 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 ## Plan
 
 ### Tue 6 Oct (Day 2): wiring and deploy
-- [x] GCP project `y-srinivasreddy`, billing linked, APIs enabled (see `docs/DEPLOYMENT.md`). Budget alert `copilot-alert` INR 2000 set; **Vertex quota cap still TODO**.
+- [x] GCP project `y-srinivasreddy`, billing linked, APIs enabled (see `docs/DEPLOYMENT.md`). Budget alert `copilot-alert` INR 2000 set (email only). **Vertex quota cap = first item tomorrow morning.**
+- [ ] Size `GLOBAL_DAILY_CASE_CAP` from E8 cost/case vs INR 2000; keep sample uncapped.
 - [x] Gemini model: `gemini-2.5-flash` in `us-central1` (verified). `gemini-3.5-flash` 404 on this project.
 - [x] `python -m scripts.smoke_vertex` passes. Vertex rejects length constraints → `vertex_response_schema()` loosens schema; Pydantic still validates.
 - [x] Cloud Run API live (`opportunity-copilot-api`, us-central1). Gate checks: `/api/health`, `/api/sample`, `/api/config` OK.

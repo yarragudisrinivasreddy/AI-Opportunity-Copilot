@@ -53,6 +53,10 @@ class InMemoryRepository:
             keys = sorted(k for k in self.docs if k[0] == case_id and k[1] == collection)
             return [copy.deepcopy(self.docs[k]) for k in keys]
 
+    def get_daily_cases(self, uid: str, day: str) -> int:
+        with self._lock:
+            return int(self.daily.get((uid, day), 0))
+
     def incr_daily_cases(self, uid: str, day: str) -> int:
         with self._lock:
             self.daily[(uid, day)] = self.daily.get((uid, day), 0) + 1

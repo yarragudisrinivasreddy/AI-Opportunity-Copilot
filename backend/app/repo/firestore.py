@@ -53,6 +53,12 @@ class FirestoreRepository:
         docs = self._case(case_id).collection(collection).stream()
         return [d.to_dict() for d in sorted(docs, key=lambda d: d.id)]
 
+    def get_daily_cases(self, uid: str, day: str) -> int:
+        snap = self._db.collection("rateLimits").document(f"{uid}_{day}").get()
+        if not snap.exists:
+            return 0
+        return int((snap.to_dict() or {}).get("caseCount", 0))
+
     def incr_daily_cases(self, uid: str, day: str) -> int:
         ref = self._db.collection("rateLimits").document(f"{uid}_{day}")
         ref.set({"caseCount": self._fs.Increment(1), "updatedAt": self._fs.SERVER_TIMESTAMP}, merge=True)

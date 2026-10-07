@@ -118,16 +118,25 @@ def test_media_after_analysis_rejected(client, jpeg):
 def test_daily_case_cap(client):
     for _ in range(3):
         new_case(client)
-    assert client.post("/api/cases", json={}, headers=ALICE).status_code == 429
+    r = client.post("/api/cases", json={}, headers=ALICE)
+    assert r.status_code == 429 and "sample case" in r.json()["detail"].lower()
     assert client.post("/api/cases", json={}, headers=BOB).status_code == 201
+    # Sample never counts against caps and stays available.
+    assert client.get("/api/sample").status_code == 200
+    assert client.ctx.llm.calls == []
 
 
 def test_global_daily_case_cap():
     s = Settings(env="test", daily_case_cap=100, global_daily_case_cap=2, rate_limit_per_minute=1000)
     ctx = build_context(s)
     c = TestClient(create_app(s, ctx))
+    c.ctx = ctx
     assert new_case(c) and new_case(c, headers=BOB)
-    assert c.post("/api/cases", json={}, headers={"X-Dev-User": "carol"}).status_code == 429
+    r = c.post("/api/cases", json={}, headers={"X-Dev-User": "carol"})
+    assert r.status_code == 429 and "capacity" in r.json()["detail"].lower()
+    assert "sample case" in r.json()["detail"].lower()
+    assert c.get("/api/sample").status_code == 200
+    assert c.ctx.llm.calls == []
 
 
 def test_rate_limit():
