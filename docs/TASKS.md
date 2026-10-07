@@ -33,7 +33,8 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 - [x] GCP project `y-srinivasreddy`, billing linked, APIs enabled (see `docs/DEPLOYMENT.md`). **Budget alert still TODO** (needs console / alpha component).
 - [x] Gemini model: `gemini-2.5-flash` in `us-central1` (verified). `gemini-3.5-flash` 404 on this project.
 - [x] `python -m scripts.smoke_vertex` passes. Vertex rejects length constraints → `vertex_response_schema()` loosens schema; Pydantic still validates.
-- [ ] Deploy backend to Cloud Run; Firebase Hosting + anonymous Auth; confirm the live URL works in an incognito window.
+- [x] Cloud Run API live (`opportunity-copilot-api`, us-central1). Gate checks: `/api/health`, `/api/sample`, `/api/config` OK.
+- [ ] Firebase Hosting + anonymous Auth + frontend `.env.local`; incognito CSP check on Hosting URL.
 - [x] `firebase.json` region set to `us-central1`; Firestore database id `copilot` (Native).
 - [ ] Re-run `backend/scripts/e2e_browser.py` against the deployed stack (it currently passes locally with the fake LLM).
 - [ ] Confirm Builder Cup repo rules in the portal (size limit, branches, attempts).
