@@ -71,7 +71,9 @@ def create_app(settings: Settings | None = None, context: AppContext | None = No
         return err(400, str(exc))
 
     @app.get("/healthz")
+    @app.get("/health")
     def healthz() -> dict:
+        # Prefer /health or /api/health: Cloud Run's edge can swallow bare /healthz.
         return {"status": "ok", "env": settings.env}
 
     app.include_router(router)

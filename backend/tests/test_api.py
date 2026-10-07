@@ -139,6 +139,8 @@ def test_validation_errors(client):
 def test_security_headers_and_cors(client):
     r = client.get("/healthz")
     assert r.status_code == 200
+    assert client.get("/health").status_code == 200
+    assert client.get("/api/health").json()["status"] == "ok"
     assert r.headers["x-content-type-options"] == "nosniff" and r.headers["x-frame-options"] == "DENY"
     assert "default-src 'none'" in r.headers["content-security-policy"]
     ok = client.options("/api/cases", headers={"Origin": "http://localhost:5173", "Access-Control-Request-Method": "POST"})
