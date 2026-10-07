@@ -7,20 +7,20 @@ You are continuing a hackathon build. Deadline: **submit Sat 17 Oct 2026**, hard
 | Area | State | Trust |
 |---|---|---|
 | Deterministic core (rubric, ROI, scorer, ranking, injection scan, text PII, privacy pipeline) | Implemented | **Tested** (offline pytest green, incl. uploads kill switch, global case cap, Vertex schema helper) |
-| Four agents + structured-output plumbing | Implemented | Fake LLM in tests; **VisionProcessAgent smoke OK** on live Vertex (`gemini-2.5-flash` / `us-central1`) |
-| Case workflow, gating, ownership, audit, rate limits | Implemented | Per-UID + **global** daily case caps; per-UID + **per-IP** per-minute limits |
-| Frontend (5 screens, sample mode, accessible markup) | Implemented | Hosting live; sample case works. Phone / full a11y audit still open |
-| Vertex Gemini client (`app/llm/vertex.py`) | Implemented | **Verified** (`scripts.smoke_vertex`, 2026-10-07). `GEMINI_MODEL=gemini-2.5-flash`. API gets a loosened JSON schema (length/`minItems` stripped + `$ref` inlined); **Pydantic still validates** the response |
-| Firestore / GCS | Implemented | Native DB **`copilot`** (`us-central1`); `FirestoreRepository(..., database=settings.firestore_database)`; Cloud Run env `FIRESTORE_DATABASE=copilot`; `firebase.json` `"database": "copilot"`. GCS bucket `y-srinivasreddy-copilot-media` |
-| Cloud Vision / Cloud DLP | Written | **UNVERIFIED** on real frames → production `UPLOADS_ENABLED=false` (text-only) |
-| Uploads kill switch | Implemented | API 403 + `/api/config` + frontend hides file input |
+| Four agents + structured-output plumbing | Implemented | Fake LLM in tests; **live text E2E through evaluation** on Vertex (`gemini-2.5-flash` / `us-central1`, 2026-10-07) |
+| Case workflow, gating, ownership, audit, rate limits | Implemented | Per-UID + **global** daily case caps; per-UID + **per-IP** per-minute limits (live Cloud Run env confirmed) |
+| Frontend (5 screens, sample mode, accessible markup) | Implemented | **Verified** on Hosting; live text case OK. Phone / full a11y audit still open |
+| Vertex Gemini client (`app/llm/vertex.py`) | Implemented | **Verified** (smoke + live E2E). `GEMINI_MODEL=gemini-2.5-flash`. API schema: length/`minItems`/etc. **stripped** and `$ref` inlined for Vertex; property names like `title`/`description` kept under `properties`; **Pydantic still validates** the response |
+| Firestore / GCS | Implemented | **Verified** writes on live cases. Native DB **`copilot`** (`us-central1`); `FirestoreRepository(..., database=settings.firestore_database)`; Cloud Run `FIRESTORE_DATABASE=copilot`; `firebase.json` `"database": "copilot"`. GCS bucket `y-srinivasreddy-copilot-media` |
+| Cloud Vision / Cloud DLP | Written | **UNVERIFIED** on real frames → production `UPLOADS_ENABLED=false` (text-only). Decide by Fri 9 Oct whether uploads ship or deck stays text-only |
+| Uploads kill switch | Implemented | API 403 + `/api/config` + frontend hides file input (blur/mask notice only shown when uploads on) |
 | Firebase Auth (anonymous) | Configured | Anonymous enabled; App Check **not** enforced yet (`ENFORCE_APP_CHECK=false` until registered) |
 | Dockerfile | Verified | Cloud Build succeeded for Cloud Run |
-| Cloud Run API | Deployed | https://opportunity-copilot-api-redqkgtx4a-uc.a.run.app — use **`/api/health`** (not bare `/healthz`) |
-| Firebase Hosting | Deployed | https://y-srinivasreddy.web.app — rewrite to Cloud Run; sample case OK |
-| GitHub | Pushed | https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main` only) |
+| Cloud Run API | Deployed | **Verified** https://opportunity-copilot-api-redqkgtx4a-uc.a.run.app — use **`/api/health`** (not bare `/healthz`) |
+| Firebase Hosting | Deployed | **Verified** https://y-srinivasreddy.web.app — rewrite to Cloud Run; CSP/console clean on fresh load + live case (2026-10-07) |
+| GitHub | Pushed | https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main` only); fresh-clone ~0.61MB, no `.env`, `pytest` + `npm run build` OK |
 | Sample case fixture | Fake LLM | Walkthrough only |
-| Budget / Vertex quota | Partial | Billing linked; **budget alert + Vertex quota cap still TODO before submit** |
+| Budget / Vertex quota | Partial | Billing linked; **budget alert `copilot-alert` INR 2000 set**; **Vertex quota cap still TODO** in console before submit |
 
 ## Commands
 
@@ -68,7 +68,10 @@ cd backend && python scripts/e2e_browser.py          # browser smoke test; needs
 
 ## Known gaps (highest value first)
 
-See `docs/TASKS.md`. Top items: budget alert + Vertex quota; live text case through evaluation; Vision/DLP or keep text-only and align deck; App Check; held-out benchmark data; team lock Sun 11 Oct; accessibility audit; deck and video.
+See `docs/TASKS.md`. Top items: **Vertex quota cap**; App Check (`ENFORCE_APP_CHECK`); Vision/DLP on real frames **or** keep text-only and align deck/DEMO_SCRIPT by Fri 9 Oct; held-out benchmark data + rankers by 11–12 Oct; **team lock Sun 11 Oct**; accessibility audit; deck and video.
+
+### Live E2E note (2026-10-07)
+Text-only case on Hosting → analyse → confirm → discover → brief → simulated proposals → evaluate. Ranking sane (VisionWorks 87% > Apex 72% injection-flagged > LeanBuild 27%); UI showed “citations verified” and injection strip notice. First brief attempt once failed transiently; retry succeeded.
 
 ## How to work
 

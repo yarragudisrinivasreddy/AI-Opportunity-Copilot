@@ -30,21 +30,22 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 ## Plan
 
 ### Tue 6 Oct (Day 2): wiring and deploy
-- [x] GCP project `y-srinivasreddy`, billing linked, APIs enabled (see `docs/DEPLOYMENT.md`). **Budget alert still TODO** (needs console / alpha component).
+- [x] GCP project `y-srinivasreddy`, billing linked, APIs enabled (see `docs/DEPLOYMENT.md`). Budget alert `copilot-alert` INR 2000 set; **Vertex quota cap still TODO**.
 - [x] Gemini model: `gemini-2.5-flash` in `us-central1` (verified). `gemini-3.5-flash` 404 on this project.
 - [x] `python -m scripts.smoke_vertex` passes. Vertex rejects length constraints → `vertex_response_schema()` loosens schema; Pydantic still validates.
 - [x] Cloud Run API live (`opportunity-copilot-api`, us-central1). Gate checks: `/api/health`, `/api/sample`, `/api/config` OK.
-- [x] Firebase Hosting + anonymous Auth + frontend `.env.local`; Hosting live; sample case loads. (Incognito CSP still worth a quick human pass.)
-- [x] `firebase.json` region set to `us-central1`; Firestore database id `copilot` (Native).
-- [ ] Re-run `backend/scripts/e2e_browser.py` against the deployed stack (it currently passes locally with the fake LLM).
+- [x] Firebase Hosting + anonymous Auth + frontend `.env.local`; Hosting live; sample + **live text E2E through evaluation** OK. CSP/console clean on fresh load (human Incognito pass still nice).
+- [x] `firebase.json` region set to `us-central1`; Firestore database id `copilot` (Native); Cloud Run `FIRESTORE_DATABASE=copilot`.
+- [x] Manual live text E2E on Hosting (analyse→evaluate); `e2e_browser.py` against deploy still optional.
 - [ ] Confirm Builder Cup repo rules in the portal (size limit, branches, attempts).
-- [x] GitHub: https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main` pushed). Fresh clone verify still nice-to-have.
-- [x] Uploads kill switch (`UPLOADS_ENABLED`); production ships text-only until Vision/DLP verified.
+- [x] GitHub: https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main` pushed). Fresh clone ~0.61MB, no `.env`, `pytest` + `npm run build` OK.
+- [x] Uploads kill switch (`UPLOADS_ENABLED`); production ships text-only until Vision/DLP verified. Global case cap + per-IP limit live.
 
 ### Wed 7 to Fri 9 Oct: real-model quality
-- [ ] Run the full flow on real photos. Tune `llm/prompts.py` (Process, Opportunity, Brief, Extractor). Log any schema failures.
-- [ ] Verify Cloud Vision face detection and Cloud DLP image redaction on real frames; add a privacy test set (E7).
-- [ ] Capture demo media (staged, consenting, no real company data). Re-run `python -m scripts.build_fixtures` after generating the sample process/brief with Gemini if desired.
+- [x] Live **text-only** flow on real Vertex through evaluation (scores + citations looked sane). Prompt tuning on real output still open.
+- [ ] Decide by **Fri 9 Oct**: ship photo upload (then verify Vision+DLP on real frames) **or** keep text-only and align deck/DEMO_SCRIPT (no “faces blurred” claim for the live demo).
+- [ ] If uploads ship: verify Cloud Vision face detection and Cloud DLP image redaction on real frames; add a privacy test set (E7).
+- [ ] Capture demo media (staged, consenting, no real company data) if uploads ship. Re-run `python -m scripts.build_fixtures` after generating the sample process/brief with Gemini if desired.
 - [x] **ADK:** keep plain Python (`CaseService` + agents); no ADK wrap. Describe honestly in deck/PRD.
 - [ ] Weight sliders on the evaluation screen (backend already accepts `weights`) — nice-to-have after deploy/privacy.
 
