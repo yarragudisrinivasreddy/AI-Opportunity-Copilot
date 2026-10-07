@@ -14,9 +14,11 @@ You are continuing a hackathon build. Deadline: **submit Sat 17 Oct 2026**, hard
 | Firestore / GCS repos (`app/repo/firestore.py`) | Written | Native DB **`copilot`** created in `us-central1`; GCS bucket `y-srinivasreddy-copilot-media` created. Client accepts `FIRESTORE_DATABASE`. **Live read/write UNVERIFIED** until Cloud Run |
 | Cloud Vision face detection, Cloud DLP image redaction | Written | **UNVERIFIED**; keep `UPLOADS_ENABLED=false` in production until verified |
 | Uploads kill switch | Implemented | API 403 + `/api/config` + frontend hide file input when disabled |
-| Firebase Auth (anonymous) + ID-token verification | Written | **UNVERIFIED** — Firebase CLI login / web app config still needed |
-| Dockerfile, firebase.json, firestore.rules | Written | **Dockerfile verified** via Cloud Build (`opportunity-copilot-api` live). Hosting/rules still need Firebase login |
-| Cloud Run API | Deployed | `https://opportunity-copilot-api-redqkgtx4a-uc.a.run.app` — `/api/health`, `/api/sample`, `/api/config` OK; `UPLOADS_ENABLED=false`. Use `/api/health` (bare `/healthz` is swallowed by Cloud Run edge) |
+| Firebase Auth (anonymous) + ID-token verification | Configured | Firebase on `y-srinivasreddy`; web app created; **Anonymous enabled**. Live ID-token path still needs an end-to-end case run |
+| Dockerfile, firebase.json, firestore.rules | Verified | Cloud Build OK; Hosting + Firestore rules deployed to `copilot` DB |
+| Cloud Run API | Deployed | `https://opportunity-copilot-api-redqkgtx4a-uc.a.run.app` — `/api/health`, `/api/sample`, `/api/config` OK; `UPLOADS_ENABLED=false` |
+| Firebase Hosting | Deployed | https://y-srinivasreddy.web.app (and `.firebaseapp.com`) — `/api/health` + `/api/sample` via rewrite OK |
+| GitHub | Pushed | https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main`) |
 | Sample case fixture | Generated with the **fake** LLM | Walkthrough only; regenerate with Gemini |
 | GCP project `y-srinivasreddy` | Linked | Billing linked; APIs enabled; SA `copilot-api` + IAM for Vertex/Firestore/DLP/GCS |
 

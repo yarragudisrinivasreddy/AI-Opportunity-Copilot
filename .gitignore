@@ -26,3 +26,4 @@ frontend/dist/
 *.log
 tmp/
 eval/results/
+.firebase/
