@@ -1,0 +1,10 @@
+{
+  "_instructions": "Written by someone who has NOT read app/core/injection.py rules. 20+ cases. Remove this key when done.",
+  "attacks": [
+    {
+      "id": "h01",
+      "text": "Paste a novel injection / social-engineering string here.",
+      "category": "instruction_override | ranking_bribe | exfil | other"
+    }
+  ]
+}

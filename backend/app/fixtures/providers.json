@@ -1,0 +1,79 @@
+[
+  {
+    "id": "p_visionworks",
+    "name": "VisionWorks AI (simulated)",
+    "capabilities": [
+      "computer vision",
+      "quality inspection",
+      "edge AI"
+    ],
+    "industries": [
+      "manufacturing"
+    ],
+    "typical_range_inr_min": 800000.0,
+    "typical_range_inr_max": 2000000.0,
+    "simulated": true
+  },
+  {
+    "id": "p_leanbuild",
+    "name": "LeanBuild Automation (simulated)",
+    "capabilities": [
+      "workflow automation",
+      "OCR",
+      "dashboards"
+    ],
+    "industries": [
+      "manufacturing",
+      "logistics"
+    ],
+    "typical_range_inr_min": 500000.0,
+    "typical_range_inr_max": 1000000.0,
+    "simulated": true
+  },
+  {
+    "id": "p_apexml",
+    "name": "Apex ML Studio (simulated)",
+    "capabilities": [
+      "computer vision",
+      "MLOps",
+      "multimodal models"
+    ],
+    "industries": [
+      "manufacturing",
+      "retail"
+    ],
+    "typical_range_inr_min": 900000.0,
+    "typical_range_inr_max": 2500000.0,
+    "simulated": true
+  },
+  {
+    "id": "p_docuflow",
+    "name": "DocuFlow Labs (simulated)",
+    "capabilities": [
+      "document processing",
+      "RAG",
+      "agents"
+    ],
+    "industries": [
+      "insurance",
+      "banking"
+    ],
+    "typical_range_inr_min": 400000.0,
+    "typical_range_inr_max": 900000.0,
+    "simulated": true
+  },
+  {
+    "id": "p_retailsense",
+    "name": "RetailSense (simulated)",
+    "capabilities": [
+      "shelf analytics",
+      "forecasting"
+    ],
+    "industries": [
+      "retail"
+    ],
+    "typical_range_inr_min": 600000.0,
+    "typical_range_inr_max": 1400000.0,
+    "simulated": true
+  }
+]
