@@ -1,0 +1,28 @@
+# secrets and env
+.env
+.env.*
+!.env.example
+*.pem
+*service-account*.json
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# node
+node_modules/
+frontend/dist/
+# editors / os / agent
+.DS_Store
+.idea/
+.vscode/
+.cursor/
+# local artifacts
+*.log
+tmp/
+eval/results/

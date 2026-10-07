@@ -1,0 +1,16 @@
+{
+  "_instructions": "Fill BEFORE any Vertex/model run on these processes. Remove this key when done. 10 processes; mark 3 held_out.",
+  "processes": [
+    {
+      "id": "proc01",
+      "held_out": false,
+      "source": "staged photo / text description — describe briefly",
+      "human_steps": [
+        {"name": "step name", "kind": "observation_or_assumption", "notes": ""}
+      ],
+      "expected_opportunity_themes": ["theme that should appear if AI-suitable, or empty if not"],
+      "ai_suitable": true,
+      "notes": ""
+    }
+  ]
+}

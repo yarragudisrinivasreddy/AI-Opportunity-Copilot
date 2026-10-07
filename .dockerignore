@@ -1,0 +1,11 @@
+.git
+.cursor
+docs
+frontend
+backend/tests
+backend/eval
+backend/scripts
+**/__pycache__
+**/.pytest_cache
+.env
+.env.*
