@@ -34,11 +34,11 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 - [x] Gemini model: `gemini-2.5-flash` in `us-central1` (verified). `gemini-3.5-flash` 404 on this project.
 - [x] `python -m scripts.smoke_vertex` passes. Vertex rejects length constraints → `vertex_response_schema()` loosens schema; Pydantic still validates.
 - [x] Cloud Run API live (`opportunity-copilot-api`, us-central1). Gate checks: `/api/health`, `/api/sample`, `/api/config` OK.
-- [ ] Firebase Hosting + anonymous Auth + frontend `.env.local`; incognito CSP check on Hosting URL.
+- [x] Firebase Hosting + anonymous Auth + frontend `.env.local`; Hosting live; sample case loads. (Incognito CSP still worth a quick human pass.)
 - [x] `firebase.json` region set to `us-central1`; Firestore database id `copilot` (Native).
 - [ ] Re-run `backend/scripts/e2e_browser.py` against the deployed stack (it currently passes locally with the fake LLM).
 - [ ] Confirm Builder Cup repo rules in the portal (size limit, branches, attempts).
-- [x] Git repo initialized on `main` (local). **GitHub remote / fresh clone still TODO** (`gh` not installed).
+- [x] GitHub: https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main` pushed). Fresh clone verify still nice-to-have.
 - [x] Uploads kill switch (`UPLOADS_ENABLED`); production ships text-only until Vision/DLP verified.
 
 ### Wed 7 to Fri 9 Oct: real-model quality
