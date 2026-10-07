@@ -16,6 +16,7 @@ export default function App() {
   const [vm, setVm] = useState<ViewModel>(EMPTY);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [offerSample, setOfferSample] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [uploadsEnabled, setUploadsEnabled] = useState(true);
@@ -31,17 +32,26 @@ export default function App() {
     }).catch(() => { /* keep defaults if config fails */ });
   }, []);
 
-  const go = useCallback((s: Stage) => { setStage(s); setError(null); setTimeout(() => main.current?.focus(), 0); }, []);
+  const go = useCallback((s: Stage) => { setStage(s); setError(null); setOfferSample(false); setTimeout(() => main.current?.focus(), 0); }, []);
   const run = useCallback(async (msg: string, fn: () => Promise<void>) => {
-    setBusy(msg); setError(null);
-    try { await fn(); } catch (e) { setError(e instanceof ApiError ? e.message : "Something went wrong. Please try again or use the sample case."); } finally { setBusy(null); }
+    setBusy(msg); setError(null); setOfferSample(false);
+    try { await fn(); } catch (e) {
+      const message = e instanceof ApiError || e instanceof Error
+        ? e.message
+        : "Something went wrong. Please try again or use the sample case.";
+      setError(message);
+      setOfferSample(
+        (e instanceof ApiError && e.status === 429)
+          || /sample case|storage|Sign-in failed|capacity|limit/i.test(message),
+      );
+    } finally { setBusy(null); }
   }, []);
 
   const loadSample = () => run("Loading the sample case", async () => {
     const s = await api.sample();
     setVm({ isSample: true, privacy: [], process: s.process, confirmed: true, opportunities: s.opportunities, notAiExplanation: s.notAiExplanation,
       brief: s.brief, providers: s.providers, proposals: s.proposals, evaluation: s.evaluation });
-    setSelected("o1"); go("understand");
+    setSelected("o1"); setOfferSample(false); go("understand");
   });
 
   return (
@@ -57,7 +67,14 @@ export default function App() {
       </header>
       <main id="main" ref={main} tabIndex={-1}>
         <div aria-live="polite" role="status" className="status">{busy ? `${busy}…` : ""}</div>
-        {error && <p className="notice warn" role="alert">{error}</p>}
+        {error && (
+          <div className="notice warn" role="alert">
+            <p>{error}</p>
+            {offerSample && !vm.isSample && (
+              <p><button type="button" className="secondary" onClick={loadSample} disabled={!!busy}>Try the sample case</button></p>
+            )}
+          </div>
+        )}
         {vm.isSample && <p className="notice" role="note">Sample case: read-only walkthrough with simulated providers. No AI calls are made.</p>}
 
         {stage === "home" && (

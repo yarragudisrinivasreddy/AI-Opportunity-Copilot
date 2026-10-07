@@ -35,6 +35,16 @@ class QuotaExceeded(Exception):
     pass
 
 
+GLOBAL_CAP_MESSAGE = (
+    "Today's live demo capacity is full. The paid AI path is paused to control cost. "
+    "Open Try the sample case — it always works and does not use the model."
+)
+USER_CAP_MESSAGE = (
+    "You have reached today's limit for live cases. "
+    "Open Try the sample case — it always works and does not use the model."
+)
+
+
 class UploadsDisabled(Exception):
     """Photo/video upload is turned off (e.g. privacy pipeline not verified)."""
 
@@ -105,10 +115,13 @@ class CaseService:
     # ---------- lifecycle ----------
     def create_case(self, uid: str, vertical: str = "manufacturing") -> dict:
         day = dt.date.today().isoformat()
+        # Peek per-user first so a capped user does not burn a global slot.
+        if self.s.repo.get_daily_cases(uid, day) >= self.s.daily_case_cap:
+            raise QuotaExceeded(USER_CAP_MESSAGE)
         if self.s.repo.incr_global_daily_cases(day) > self.s.global_daily_case_cap:
-            raise QuotaExceeded("the service is at capacity today; use the sample case")
+            raise QuotaExceeded(GLOBAL_CAP_MESSAGE)
         if self.s.repo.incr_daily_cases(uid, day) > self.s.daily_case_cap:
-            raise QuotaExceeded("daily case limit reached; use the sample case")
+            raise QuotaExceeded(USER_CAP_MESSAGE)
         case = {
             "id": uuid.uuid4().hex[:16],
             "ownerUid": uid,

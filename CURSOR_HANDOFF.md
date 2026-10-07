@@ -20,7 +20,7 @@ You are continuing a hackathon build. Deadline: **submit Sat 17 Oct 2026**, hard
 | Firebase Hosting | Deployed | **Verified** https://y-srinivasreddy.web.app — rewrite to Cloud Run; CSP/console clean on fresh load + live case (2026-10-07) |
 | GitHub | Pushed | https://github.com/yarragudisrinivasreddy/AI-Opportunity-Copilot (`main` only); fresh-clone ~0.61MB, no `.env`, `pytest` + `npm run build` OK |
 | Sample case fixture | Fake LLM | Walkthrough only |
-| Budget / Vertex quota | Partial | Billing linked; **budget alert `copilot-alert` INR 2000 set**; **Vertex quota cap still TODO** in console before submit |
+| Budget / Vertex quota | Partial | Billing linked; budget alert `copilot-alert` INR 2000 **emails only**; **Vertex quota cap still TODO** (real brake). Cap UX: sample never counts; 429 points to sample |
 
 ## Commands
 

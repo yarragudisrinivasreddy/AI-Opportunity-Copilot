@@ -34,6 +34,12 @@ cd .. && firebase deploy --only hosting,firestore
 ```
 Before deploying, replace `REPLACE_WITH_CLOUD_RUN_REGION` in `firebase.json`.
 
-Checklist: **budget alert** set (`copilot-alert` INR 2000); **Vertex AI quota** capped in IAM Quotas (**still TODO**); `GLOBAL_DAILY_CASE_CAP` / `DAILY_CASE_CAP` set; App Check registered then `ENFORCE_APP_CHECK=true`; min instances decided (cold starts vs cost) through 6 Nov; Incognito CSP check on Hosting (automated fresh-tab clean 2026-10-07); confirm no secret in the repo; fresh-clone verify (single branch, small size, `pytest` + `npm run build`).
+Checklist:
+- **budget alert** set (`copilot-alert` INR 2000) — emails only; does **not** stop spend.
+- **Vertex AI quota** capped in IAM Quotas (**first item tomorrow morning** — this is the real spend brake).
+- `GLOBAL_DAILY_CASE_CAP` / `DAILY_CASE_CAP` set; size global cap from `python -m eval.run --suite e8 --llm vertex` cost/case vs INR 2000. Sample must never count against caps.
+- **App Check:** register provider → run in **monitor** mode → test Incognito + phone → only then `ENFORCE_APP_CHECK=true`. Keep a one-command rollback (`false` + redeploy). Do not flip on late 17 Oct.
+- Incognito / second browser / mobile / Safari private: sample loads; live path fails with a clear sign-in/storage message (not a blank screen).
+- Fresh-clone verify (single branch, small size, `pip install -r requirements-dev.txt` + `pytest`, `npm ci` + `npm run build`).
 
 Uptime / gate health URL: `https://HOST/api/health` (not `/healthz`).

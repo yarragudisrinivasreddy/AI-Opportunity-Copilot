@@ -13,14 +13,21 @@ const cfg = {
 let tokenProvider: (() => Promise<string>) | null = null;
 
 async function firebaseToken(): Promise<string> {
-  if (!tokenProvider) {
-    const { initializeApp } = await import("firebase/app");
-    const { getAuth, signInAnonymously } = await import("firebase/auth");
-    const auth = getAuth(initializeApp(cfg));
-    if (!auth.currentUser) await signInAnonymously(auth);
-    tokenProvider = async () => (await auth.currentUser!.getIdToken());
+  try {
+    if (!tokenProvider) {
+      const { initializeApp } = await import("firebase/app");
+      const { getAuth, signInAnonymously } = await import("firebase/auth");
+      const auth = getAuth(initializeApp(cfg));
+      if (!auth.currentUser) await signInAnonymously(auth);
+      tokenProvider = async () => (await auth.currentUser!.getIdToken());
+    }
+    return await tokenProvider();
+  } catch {
+    throw new Error(
+      "Sign-in failed. This browser may be blocking site storage (private/incognito). "
+        + "Use Try the sample case, or allow cookies/storage for this site and reload.",
+    );
   }
-  return tokenProvider();
 }
 
 function devId(): string {
