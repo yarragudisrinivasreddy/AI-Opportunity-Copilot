@@ -30,20 +30,22 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 ## Plan
 
 ### Tue 6 Oct (Day 2): wiring and deploy
-- [ ] GCP project, billing/credits, enable APIs (see `docs/DEPLOYMENT.md`). Set a **budget alert**.
-- [ ] Verify the current Gemini model ID and a region that serves it. Set `GEMINI_MODEL`, `GCP_LOCATION`.
-- [ ] `python -m scripts.smoke_vertex` passes. Fix SDK drift. Check that Pydantic `Field(max_length/min_length)` constraints are accepted in `response_schema`; if the SDK rejects them, loosen the LLM-facing schemas and keep validation in code.
+- [x] GCP project `y-srinivasreddy`, billing linked, APIs enabled (see `docs/DEPLOYMENT.md`). **Budget alert still TODO** (needs console / alpha component).
+- [x] Gemini model: `gemini-2.5-flash` in `us-central1` (verified). `gemini-3.5-flash` 404 on this project.
+- [x] `python -m scripts.smoke_vertex` passes. Vertex rejects length constraints → `vertex_response_schema()` loosens schema; Pydantic still validates.
 - [ ] Deploy backend to Cloud Run; Firebase Hosting + anonymous Auth; confirm the live URL works in an incognito window.
-- [ ] Replace `REPLACE_WITH_CLOUD_RUN_REGION` in `firebase.json`.
+- [x] `firebase.json` region set to `us-central1`; Firestore database id `copilot` (Native).
 - [ ] Re-run `backend/scripts/e2e_browser.py` against the deployed stack (it currently passes locally with the fake LLM).
 - [ ] Confirm Builder Cup repo rules in the portal (size limit, branches, attempts).
+- [x] Git repo initialized on `main` (local). **GitHub remote / fresh clone still TODO** (`gh` not installed).
+- [x] Uploads kill switch (`UPLOADS_ENABLED`); production ships text-only until Vision/DLP verified.
 
 ### Wed 7 to Fri 9 Oct: real-model quality
 - [ ] Run the full flow on real photos. Tune `llm/prompts.py` (Process, Opportunity, Brief, Extractor). Log any schema failures.
 - [ ] Verify Cloud Vision face detection and Cloud DLP image redaction on real frames; add a privacy test set (E7).
 - [ ] Capture demo media (staged, consenting, no real company data). Re-run `python -m scripts.build_fixtures` after generating the sample process/brief with Gemini if desired.
-- [ ] Decide on ADK (see CURSOR_HANDOFF deviation 1).
-- [ ] Weight sliders on the evaluation screen (backend already accepts `weights`).
+- [x] **ADK:** keep plain Python (`CaseService` + agents); no ADK wrap. Describe honestly in deck/PRD.
+- [ ] Weight sliders on the evaluation screen (backend already accepts `weights`) — nice-to-have after deploy/privacy.
 
 ### Sat 10 to Mon 12 Oct: benchmark data
 - [ ] Ground-truth labels for 10 processes (human, before any model run). Format: `docs/EVALUATION.md`.
