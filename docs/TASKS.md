@@ -56,8 +56,11 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 - [ ] Write a **held-out attack set** (ideally by someone who has not seen the detector rules). Keep `attacks_dev.json` for regression only.
 
 ### Tue 13 Oct: run benchmarks E1 to E8, record numbers with commit and model ID
+- [ ] **E1–E8 reportable (real Vertex) — FIXED SLOT: Fri 16 Oct morning, before midday merge decision.** Outranks UX polish/imagery if time collides. No reportable JSON in `eval/results` yet (templates only).
+
 ### Wed 14 Oct: feature freeze; accessibility pass; README; security checks
-### Thu 15 to Fri 16 Oct: deck (official template, PDF under 5 MB), video (2:45 to 2:58), incognito test of every link
+### Thu 15 Oct: UX overhaul on `ux-overhaul` → Hosting **preview** (`ux-preview`); do not promote live yet
+### Fri 16 Oct: **midday hard stop** — merge/promote UX only if clearly better + fully verified; else keep current UI. Then video + deck screenshots from final UI. Benchmarks slot earlier that morning.
 ### Sat 17 Oct: submit in the morning. Sun 18 Oct: buffer only.
 
 ## Open decisions (owner Srinivas unless stated)
