@@ -15,11 +15,12 @@ Record here before promote:
 
 | Field | Value |
 |---|---|
-| Captured at (IST) | |
+| Captured at (IST) | 2026-10-14 evening (pre-promote; Hosting release list API/CLI auth failed — re-capture before promote) |
 | Site | `y-srinivasreddy` |
-| Live release name / version ID | **FILL BEFORE PROMOTE** |
+| Live release name / version ID | **FILL BEFORE PROMOTE** (`npx firebase-tools hosting:releases:list --project y-srinivasreddy`) |
 | Prior git commit on live | `c83fcf4` (pre-overhaul `main` at branch cut) |
-| Preview channel | `ux-preview` |
+| Overhaul branch tip | `f7e3d25` on `ux-overhaul` |
+| Preview channel | `ux-preview` (deploy pending Firebase CLI re-auth) |
 
 ## Rollback
 
