@@ -1,0 +1,118 @@
+[
+ {
+  "id": "T01",
+  "text": "Call Ramesh Naidu on 98480 12345 about the delivery to Plot 14, Jeedimetla.",
+  "spans_to_remove": [
+   "Ramesh Naidu",
+   "98480 12345",
+   "Plot 14, Jeedimetla"
+  ]
+ },
+ {
+  "id": "T02",
+  "text": "Our supervisor Anitha Rao (anitha.rao@examplemill.in) signs off every lot.",
+  "spans_to_remove": [
+   "Anitha Rao",
+   "anitha.rao@examplemill.in"
+  ]
+ },
+ {
+  "id": "T03",
+  "text": "Truck TS 09 UB 4521 arrives at gate 2 and driver Mohd Irfan writes the time.",
+  "spans_to_remove": [
+   "TS 09 UB 4521",
+   "Mohd Irfan"
+  ]
+ },
+ {
+  "id": "T04",
+  "text": "Payments go to farmer Lakshmi Devi, village Pocharam, phone 91000 55512.",
+  "spans_to_remove": [
+   "Lakshmi Devi",
+   "Pocharam",
+   "91000 55512"
+  ]
+ },
+ {
+  "id": "T05",
+  "text": "Send the quote to purchase@sampleengineering.example and cc Suresh Kumar.",
+  "spans_to_remove": [
+   "purchase@sampleengineering.example",
+   "Suresh Kumar"
+  ]
+ },
+ {
+  "id": "T06",
+  "text": "Mr. K. Venkat Reddy, 3-5-112 Kachiguda, Hyderabad, checks the register.",
+  "spans_to_remove": [
+   "K. Venkat Reddy",
+   "3-5-112 Kachiguda"
+  ]
+ },
+ {
+  "id": "T07",
+  "text": "The inspector, Pooja Sharma, WhatsApps the photos to +91 90000 11122.",
+  "spans_to_remove": [
+   "Pooja Sharma",
+   "+91 90000 11122"
+  ]
+ },
+ {
+  "id": "T08",
+  "text": "Our GST contact is Farhan Ali at farhan@samplefab.example.",
+  "spans_to_remove": [
+   "Farhan Ali",
+   "farhan@samplefab.example"
+  ]
+ },
+ {
+  "id": "T09",
+  "text": "Invoice raised to Sri Balaji Traders, owner Gopal Rao, mobile 99000 22233.",
+  "spans_to_remove": [
+   "Sri Balaji Traders",
+   "Gopal Rao",
+   "99000 22233"
+  ]
+ },
+ {
+  "id": "T10",
+  "text": "Nothing personal here: the sheet has five columns and is typed every evening.",
+  "spans_to_remove": []
+ },
+ {
+  "id": "T11",
+  "text": "The scale reads 12.5 kg and the batch number is 4471.",
+  "spans_to_remove": []
+ },
+ {
+  "id": "T12",
+  "text": "Ask Divya about the Excel file stored on the PC near gate 3.",
+  "spans_to_remove": [
+   "Divya"
+  ]
+ },
+ {
+  "id": "T13",
+  "text": "Operator Ravi Teja logs in with employee code RT-2291 and writes readings.",
+  "spans_to_remove": [
+   "Ravi Teja",
+   "RT-2291"
+  ]
+ },
+ {
+  "id": "T14",
+  "text": "Complaints go to the owner Mrs Savitha Menon, flat 204, Green Heights, Kondapur.",
+  "spans_to_remove": [
+   "Savitha Menon",
+   "flat 204, Green Heights, Kondapur"
+  ]
+ },
+ {
+  "id": "T15",
+  "text": "Vendor contact: Imran Khan, 040 2345 6789.",
+  "spans_to_remove": [
+   "Imran Khan",
+   "040 2345 6789"
+  ]
+ }
+]

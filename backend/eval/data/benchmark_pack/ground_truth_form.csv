@@ -1,0 +1,11 @@
+process_id,title,labeller,right_outcome (simple_workflow | ai_helps | not_recommended),biggest_bottleneck_step (text),steps_clearly_stated_in_text (count),steps_you_would_have_to_assume (list),humans_must_stay_involved_where,notes
+P01,Garment unit: fabric lot inspection,,,,,,,
+P02,Pharma packaging: batch record entries,,,,,,,
+P03,Auto-component shop: machine downtime,,,,,,,
+P04,Rice mill: weighbridge and farmer payments,,,,,,,
+P05,Packaging printer: artwork approval,,,,,,,
+P06,Electronics assembly: board visual check,,,,,,,
+P07,Tool room: quotation preparation,,,,,,,
+P08,Warehouse: cycle counting,,,,,,,
+P09,Dairy collection centre: milk quality tests,,,,,,,
+P10,Furniture workshop: measurement to cutting list,,,,,,,

@@ -1,0 +1,302 @@
+[
+ {
+  "process_id": "P01",
+  "title": "Garment unit: fabric lot inspection",
+  "proposals": [
+   {
+    "provider": "Orchid Digital",
+    "text": "Tablet checklist for four-point inspection with automatic points total and pass or fail by lot. Alerts merchandiser by message. One site, two checkers trained. Offline mode included. Price: Rs 2.4 to 3.0 lakh. Timeline: 5 weeks.",
+    "price_lakh": "2.4 to 3.0",
+    "weeks": 5
+   },
+   {
+    "provider": "Kiln & Co",
+    "text": "Custom AI vision platform to detect fabric defects from camera images on the inspection table. Requires camera rig and 3 months of training data. Price: Rs 14 to 22 lakh. Timeline: 20 weeks.",
+    "price_lakh": "14 to 22",
+    "weeks": 20
+   },
+   {
+    "provider": "Sandhill Automation",
+    "text": "Excel macro workbook for defect entry and points. Limited to one PC and no alerting. Price: Rs 0.4 to 0.7 lakh. Timeline: 2 weeks.",
+    "price_lakh": "0.4 to 0.7",
+    "weeks": 2
+   },
+   {
+    "provider": "Harbor Logic",
+    "text": "Full ERP replacement with fabric inspection module. Implementation across all departments. Price: Rs 30 to 45 lakh. Timeline: 36 weeks.",
+    "price_lakh": "30 to 45",
+    "weeks": 36
+   }
+  ]
+ },
+ {
+  "process_id": "P02",
+  "title": "Pharma packaging: batch record entries",
+  "proposals": [
+   {
+    "provider": "Northbeam Systems",
+    "text": "Complete quality management suite with training, deviations and document control modules. Price: Rs 35 to 50 lakh. Timeline: 40 weeks.",
+    "price_lakh": "35 to 50",
+    "weeks": 40
+   },
+   {
+    "provider": "Aster Digital",
+    "text": "Basic web form for batch entries. Mentions that it is not validated for regulatory use. Price: Rs 1.5 to 2.2 lakh. Timeline: 4 weeks.",
+    "price_lakh": "1.5 to 2.2",
+    "weeks": 4
+   },
+   {
+    "provider": "Harbor Logic",
+    "text": "Photograph batch pages and use AI to read and fill the record automatically. No review step needed. Price: Rs 3 to 4 lakh. Timeline: 6 weeks.",
+    "price_lakh": "3 to 4",
+    "weeks": 6
+   },
+   {
+    "provider": "Redwood Labs",
+    "text": "Electronic batch record with required-field checks, role-based signatures and audit trail. Validation documentation supplied. Pilot on one line. Price: Rs 9 to 12 lakh. Timeline: 14 weeks.",
+    "price_lakh": "9 to 12",
+    "weeks": 14
+   }
+  ]
+ },
+ {
+  "process_id": "P03",
+  "title": "Auto-component shop: machine downtime",
+  "proposals": [
+   {
+    "provider": "Cobalt Works",
+    "text": "Tablet or phone entry at each machine with reason code list, auto timestamps and a live weekly dashboard. Two-week pilot on six machines first. Price: Rs 3.2 to 4.0 lakh. Timeline: 6 weeks.",
+    "price_lakh": "3.2 to 4.0",
+    "weeks": 6
+   },
+   {
+    "provider": "Sandhill Automation",
+    "text": "IoT sensors on every machine to capture on and off status automatically, plus dashboard. Price: Rs 11 to 16 lakh. Timeline: 14 weeks.",
+    "price_lakh": "11 to 16",
+    "weeks": 14
+   },
+   {
+    "provider": "Harbor Logic",
+    "text": "Shared Google Sheet with a form for operators and charts. No training offered. Price: Rs 0.2 to 0.4 lakh. Timeline: 1 week.",
+    "price_lakh": "0.2 to 0.4",
+    "weeks": 1
+   },
+   {
+    "provider": "Meridian Tech",
+    "text": "AI to read handwritten sheets and fill Excel. Accuracy depends on handwriting. Price: Rs 4 to 6 lakh. Timeline: 10 weeks.",
+    "price_lakh": "4 to 6",
+    "weeks": 10
+   }
+  ]
+ },
+ {
+  "process_id": "P04",
+  "title": "Rice mill: weighbridge and farmer payments",
+  "proposals": [
+   {
+    "provider": "Kiln & Co",
+    "text": "Spreadsheet template with formulas for payments. Manual entry of slips. Price: Rs 0.3 to 0.6 lakh. Timeline: 2 weeks.",
+    "price_lakh": "0.3 to 0.6",
+    "weeks": 2
+   },
+   {
+    "provider": "Aster Digital",
+    "text": "Mobile app for farmers and a cloud dashboard for the owner. Weighbridge integration listed as future phase. Price: Rs 8 to 11 lakh. Timeline: 12 weeks.",
+    "price_lakh": "8 to 11",
+    "weeks": 12
+   },
+   {
+    "provider": "Redwood Labs",
+    "text": "Weighbridge integration with a simple slip application, moisture entry, rate card lookup and automatic farmer statements. Printed slips and SMS to farmers. Price: Rs 5 to 6.5 lakh. Timeline: 8 weeks.",
+    "price_lakh": "5 to 6.5",
+    "weeks": 8
+   },
+   {
+    "provider": "Harbor Logic",
+    "text": "Complete commodity trading ERP. Price: Rs 28 to 40 lakh. Timeline: 30 weeks.",
+    "price_lakh": "28 to 40",
+    "weeks": 30
+   }
+  ]
+ },
+ {
+  "process_id": "P05",
+  "title": "Packaging printer: artwork approval",
+  "proposals": [
+   {
+    "provider": "Vantage Works",
+    "text": "AI that compares two artwork files and highlights differences in text, colour and barcode, used as a second check before plate making. People approve every result. Price: Rs 6 to 8 lakh. Timeline: 10 weeks.",
+    "price_lakh": "6 to 8",
+    "weeks": 10
+   },
+   {
+    "provider": "Redwood Labs",
+    "text": "Shared drive folders with naming rules and a checklist. Price: Rs 0.2 to 0.5 lakh. Timeline: 1 week.",
+    "price_lakh": "0.2 to 0.5",
+    "weeks": 1
+   },
+   {
+    "provider": "Orchid Digital",
+    "text": "Shared approval portal: every version stored, customer approves one locked file, plate-making can only use the approved file. Side-by-side compare view for reviewers. Price: Rs 4.5 to 6 lakh. Timeline: 8 weeks.",
+    "price_lakh": "4.5 to 6",
+    "weeks": 8
+   },
+   {
+    "provider": "Harbor Logic",
+    "text": "Complete print management information system. Price: Rs 25 to 35 lakh. Timeline: 30 weeks.",
+    "price_lakh": "25 to 35",
+    "weeks": 30
+   }
+  ]
+ },
+ {
+  "process_id": "P06",
+  "title": "Electronics assembly: board visual check",
+  "proposals": [
+   {
+    "provider": "Vantage Works",
+    "text": "AI app that reads defect photos uploaded by staff, no hardware, results in a week. Price: Rs 2 to 3 lakh. Timeline: 1 week.",
+    "price_lakh": "2 to 3",
+    "weeks": 1
+   },
+   {
+    "provider": "Quill Systems",
+    "text": "Camera station with AI to flag likely solder defects on each board for inspector review. Inspectors confirm or reject. Pilot measures missed and false flags before roll-out. Price: Rs 12 to 18 lakh. Timeline: 14 weeks.",
+    "price_lakh": "12 to 18",
+    "weeks": 14
+   },
+   {
+    "provider": "Aster Digital",
+    "text": "Tablet defect tally to replace paper sheets. Price: Rs 1.2 to 1.8 lakh. Timeline: 3 weeks.",
+    "price_lakh": "1.2 to 1.8",
+    "weeks": 3
+   },
+   {
+    "provider": "Cobalt Works",
+    "text": "Replace inspectors completely with automated optical inspection hardware from an overseas vendor. Price: Rs 60 to 90 lakh. Timeline: 24 weeks.",
+    "price_lakh": "60 to 90",
+    "weeks": 24
+   }
+  ]
+ },
+ {
+  "process_id": "P07",
+  "title": "Tool room: quotation preparation",
+  "proposals": [
+   {
+    "provider": "Ironleaf Solutions",
+    "text": "Template-based quote generator in Excel with rate tables. No drawing reading. Price: Rs 0.8 to 1.2 lakh. Timeline: 3 weeks.",
+    "price_lakh": "0.8 to 1.2",
+    "weeks": 3
+   },
+   {
+    "provider": "Redwood Labs",
+    "text": "CAD-integrated costing system. Price: Rs 18 to 26 lakh. Timeline: 20 weeks.",
+    "price_lakh": "18 to 26",
+    "weeks": 20
+   },
+   {
+    "provider": "Harbor Logic",
+    "text": "Quote assistant: extracts dimensions and material from the drawing, proposes hours from a rate table the engineer controls, drafts the quote. Engineer reviews and approves every quote. Price: Rs 6 to 8.5 lakh. Timeline: 10 weeks.",
+    "price_lakh": "6 to 8.5",
+    "weeks": 10
+   },
+   {
+    "provider": "Northbeam Systems",
+    "text": "Fully automatic quoting from drawings with no engineer review, guaranteed within five minutes. Price: Rs 5 to 7 lakh. Timeline: 6 weeks.",
+    "price_lakh": "5 to 7",
+    "weeks": 6
+   }
+  ]
+ },
+ {
+  "process_id": "P08",
+  "title": "Warehouse: cycle counting",
+  "proposals": [
+   {
+    "provider": "Meridian Tech",
+    "text": "Replace racks with RFID tagging of every item. Price: Rs 20 to 30 lakh. Timeline: 20 weeks.",
+    "price_lakh": "20 to 30",
+    "weeks": 20
+   },
+   {
+    "provider": "Kiln & Co",
+    "text": "AI to forecast stock differences before counting. Price: Rs 5 to 7 lakh. Timeline: 12 weeks.",
+    "price_lakh": "5 to 7",
+    "weeks": 12
+   },
+   {
+    "provider": "Quill Systems",
+    "text": "Excel sheet that imports the system report and lets staff type counts. Price: Rs 0.3 to 0.5 lakh. Timeline: 2 weeks.",
+    "price_lakh": "0.3 to 0.5",
+    "weeks": 2
+   },
+   {
+    "provider": "Sandhill Automation",
+    "text": "Handheld scan app for cycle counts that compares to system stock on the spot and flags differences for immediate recount. Price: Rs 3 to 4.2 lakh. Timeline: 6 weeks.",
+    "price_lakh": "3 to 4.2",
+    "weeks": 6
+   }
+  ]
+ },
+ {
+  "process_id": "P09",
+  "title": "Dairy collection centre: milk quality tests",
+  "proposals": [
+   {
+    "provider": "Northbeam Systems",
+    "text": "Simple operator screen linked to the fat and SNF machine, auto-calculates payment from rate chart, prints receipts and ten-day statements. Training for operators. Price: Rs 2.8 to 3.8 lakh. Timeline: 6 weeks.",
+    "price_lakh": "2.8 to 3.8",
+    "weeks": 6
+   },
+   {
+    "provider": "Kiln & Co",
+    "text": "Fully AI-driven dairy platform with demand prediction and farmer chatbot. Price: Rs 15 to 22 lakh. Timeline: 20 weeks.",
+    "price_lakh": "15 to 22",
+    "weeks": 20
+   },
+   {
+    "provider": "Aster Digital",
+    "text": "Farmer mobile app with payment history. Operator entry stays manual. Price: Rs 6 to 9 lakh. Timeline: 12 weeks.",
+    "price_lakh": "6 to 9",
+    "weeks": 12
+   },
+   {
+    "provider": "Vantage Works",
+    "text": "Spreadsheet with a rate chart and formulas. Price: Rs 0.2 to 0.4 lakh. Timeline: 1 week.",
+    "price_lakh": "0.2 to 0.4",
+    "weeks": 1
+   }
+  ]
+ },
+ {
+  "process_id": "P10",
+  "title": "Furniture workshop: measurement to cutting list",
+  "proposals": [
+   {
+    "provider": "Vantage Works",
+    "text": "Room design tool for the salesperson: enter dimensions, choose wardrobe layout, see a drawing and an automatic cutting list with board optimisation. Customer sees a drawing before work starts. Price: Rs 4 to 5.5 lakh. Timeline: 9 weeks.",
+    "price_lakh": "4 to 5.5",
+    "weeks": 9
+   },
+   {
+    "provider": "Meridian Tech",
+    "text": "Spreadsheet cutting list calculator. Price: Rs 0.2 to 0.4 lakh. Timeline: 1 week.",
+    "price_lakh": "0.2 to 0.4",
+    "weeks": 1
+   },
+   {
+    "provider": "Redwood Labs",
+    "text": "AI generates wardrobe images from a photo of the room. No cutting list. Price: Rs 3 to 5 lakh. Timeline: 8 weeks.",
+    "price_lakh": "3 to 5",
+    "weeks": 8
+   },
+   {
+    "provider": "Northbeam Systems",
+    "text": "Full furniture ERP with CNC integration. Price: Rs 24 to 35 lakh. Timeline: 26 weeks.",
+    "price_lakh": "24 to 35",
+    "weeks": 26
+   }
+  ]
+ }
+]

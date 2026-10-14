@@ -51,12 +51,13 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 - [ ] Weight sliders on the evaluation screen (backend already accepts `weights`) — nice-to-have after deploy/privacy.
 
 ### Sat 10 to Mon 12 Oct: benchmark data
-- [ ] Ground-truth labels for 10 processes (human, before any model run). Format: `docs/EVALUATION.md`.
-- [ ] 10 proposal sets, 3 to 5 proposals each, from parameter sheets; 2 to 3 humans rank blind. Hold out 3 sets and 3 processes.
-- [ ] Write a **held-out attack set** (ideally by someone who has not seen the detector rules). Keep `attacks_dev.json` for regression only.
+- [x] Draft pack checked in: `backend/eval/data/benchmark_pack/` (10 process texts, 10×4 proposals, privacy snippets, empty GT/ranking CSVs, attacks brief for teammate). Synthetic / small — report as internal only.
+- [ ] **Labeller** fills `benchmark_pack/ground_truth_form.csv` BEFORE any Vertex run on these processes (~2h).
+- [ ] **2–3 rankers** fill `benchmark_pack/ranking_sheet_for_rankers.csv` blind (no trait notes file). Then build `eval/data/bid_sets.json` for E5.
+- [ ] **Teammate** (has not seen `core/injection.py`) delivers held-out attacks from `attacks_brief_for_teammate.md` → `attacks_held_out.json`. Keep `attacks_dev.json` for regression only.
 
 ### Tue 13 Oct: run benchmarks E1 to E8, record numbers with commit and model ID
-- [ ] **E1–E8 reportable (real Vertex) — FIXED SLOT: Fri 16 Oct morning, before midday merge decision.** Outranks UX polish/imagery if time collides. No reportable JSON in `eval/results` yet (templates only).
+- [ ] **E1–E8 reportable (real Vertex) — FIXED SLOT: Fri 16 Oct morning, before midday merge decision.** Blocked until GT + rankings + held-out attacks exist. Outranks UX polish if they collide. Never quote fake-LLM numbers.
 
 ### Wed 14 Oct: feature freeze; accessibility pass; README; security checks
 ### Thu 15 Oct: UX overhaul on `ux-overhaul` → Hosting **preview** (`ux-preview`); do not promote live yet
