@@ -1,4 +1,4 @@
-# AI Opportunity Copilot
+﻿# AI Opportunity Copilot
 
 Show us how work is done. We find where AI could help, write a build-ready brief, and compare builder proposals with an injection-resistant evaluator.
 
@@ -74,13 +74,13 @@ docs/                  PRD and engineering docs (start with CURSOR_HANDOFF.md)
 
 > Every morning trucks arrive with steel wire and bar stock. Security writes the vehicle in a paper register. The store clerk matches the delivery challan to the purchase order by hand. An inspector measures five pieces with a vernier caliper and writes readings on a printed sheet. At the end of the day someone types the sheet into Excel. If a lot fails, the supervisor is phoned and the lot is tagged.
 
-**Limits.** Per user **3** live cases/day; global **150** live cases/day across all users (sized from ~₹/case vs demo budget — see `docs/visual_diff/cost_per_case.json`). Sample never counts. Per-UID ~30 req/min and per-IP ~60 req/min. When a case cap is hit, the API returns **429** with a plain message and the UI offers **Retry** plus **Try the sample case**.
+**Limits.** Per user **3** live cases/day; global **150** live cases/day across all users (sized from ~₹/case vs demo budget — see `docs/evidence/cost_per_case.json`). Sample never counts. Per-UID ~30 req/min and per-IP ~60 req/min. When a case cap is hit, the API returns **429** with a plain message and the UI offers **Retry** plus **Try the sample case**.
 
 **Data & grounding.** User text is PII-redacted before the model. Process steps are labelled observation vs assumption; the user must confirm the map. Opportunity scores use fixed rubric enums. Proposal scores are computed in code from extracted facts; the model only explains with verified citations. Prompt-injection segments are stripped by rules before extraction; steering attempts are hard-flagged and ranked below clean bids. Model-only “instruction-like” hints show as an advisory badge without a rank cap.
 
 **Guardrails.** Injection scan + isolation; structured JSON schemas; code ranking; CORS allow-list; CSP without wildcards on Hosting; uploads and concept-picture generation kill-switched off for the demo (`UPLOADS_ENABLED=false`, `VISUALS_ENABLED=false`). Discover-screen illustrations are static WebPs: sample caption “AI-generated example illustration”; live caption “Example illustration (not generated from your process)”.
 
-**Services used.** Firebase Hosting, Firebase Anonymous Auth, Cloud Run (FastAPI), Firestore (`copilot`), Cloud Storage (media bucket; unused while uploads off), Gemini on Vertex AI (`gemini-2.5-flash` in `us-central1`, fallback `gemini-2.0-flash-001` after 429/503 retries; image model `gemini-nano-banana-2.1` at `global` when visuals are on), Cloud Vision and Cloud DLP (wired for privacy; not exercised while uploads are off).
+**Services used.** Firebase Hosting, Firebase Anonymous Auth, Cloud Run (FastAPI), Firestore (`copilot`), Cloud Storage (media bucket; unused while uploads off), Gemini on Vertex AI (`gemini-2.5-flash` at `global`, fallback `gemini-2.5-flash-lite` after 429/503/missing-model; image model `gemini-nano-banana-2.1` at `global` when visuals are on), Cloud Vision and Cloud DLP (wired for privacy; not exercised while uploads are off).
 
 **Latency.** Typical model waits: analyse ~17s, discover ~28s, evaluate ~20–30s (extracts parallelised at most 2-wide). The busy banner states these per-step times. On Vertex 429/503 the API retries with jittered exponential backoff (max 3 tries), then the fallback model, then a plain error with **Retry** and the sample-case link (never a raw 502 body).
 

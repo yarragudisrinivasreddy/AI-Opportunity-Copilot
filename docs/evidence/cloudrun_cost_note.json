@@ -1,0 +1,47 @@
+{
+  "as_of": "2026-10-15T20:55+05:30",
+  "service": "opportunity-copilot-api",
+  "region": "us-central1",
+  "revision_checked": "opportunity-copilot-api-00030-v8r",
+  "resources": {
+    "cpu": "1",
+    "memory": "1Gi",
+    "min_instances": 1,
+    "max_instances": 20
+  },
+  "billing": {
+    "account": "0119DE-BA5CFF-7B5CA4",
+    "currency_account": "INR",
+    "reports_url": "https://console.cloud.google.com/billing/0119DE-BA5CFF-7B5CA4/reports?project=y-srinivasreddy",
+    "note": "No BigQuery billing export in this project; minScale idle cost from Cloud Run list prices for the live resource limits (1 vCPU + 1 GiB, always allocated)."
+  },
+  "list_price_estimate_usd_month_idle_min1": {
+    "cpu_usd": 47.3,
+    "memory_usd": 5.26,
+    "total_approx_usd": 52.56,
+    "approx_inr_at_83": 4360,
+    "formula": "730h × 3600 × (1×$0.000018/vCPU-s + 1×$0.000002/GiB-s)"
+  },
+  "recommendation_for_judging_window": {
+    "min_instances": 1,
+    "after_judging": 0
+  },
+  "budget_alerts": [
+    {
+      "name": "ai-opportunity-copilot-demo-cap",
+      "id": "7f6c3169-38b0-41b9-a1c9-c6d1a9c2d5e0",
+      "amount": "24 USD",
+      "thresholds_percent": [50, 90, 100]
+    },
+    {
+      "name": "copilot-alert",
+      "id": "b86d8a62-8f6f-4bdc-97b1-534dd180384a",
+      "amount": "2000 INR",
+      "thresholds_percent": [50, 100]
+    }
+  ],
+  "caps_live": {
+    "GLOBAL_DAILY_CASE_CAP": 150,
+    "DAILY_CASE_CAP": 3
+  }
+}

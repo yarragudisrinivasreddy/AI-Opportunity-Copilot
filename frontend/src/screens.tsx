@@ -38,7 +38,7 @@ export function UnderstandScreen({
       <div className="legend">
         <Badge kind="obs">{t("obs")}</Badge> {t("leg_obs")}
         <Badge kind="asm">{t("asm")}</Badge> {t("leg_asm")}
-        <span style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
+        <span className="legend-tools">
           <span>{t("steps_n", { n: String(proc.steps.length) })}</span>
           {editable && (
             <button type="button" className="btn btn-quiet btn-sm" data-testid="add-step" onClick={() => addRef.current()}>

@@ -36,3 +36,9 @@ docs/visual_diff/quota_consumer.json
 docs/visual_diff/quota_raw.json
 docs/visual_diff/gitleaks_workdir.json
 docs/visual_diff/gitleaks_docs.json
+
+docs/footage/
+
+docs/demo/
+
+*.mp4

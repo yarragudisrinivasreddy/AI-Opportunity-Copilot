@@ -1,0 +1,34 @@
+{
+  "as_of": "2026-10-15T19:50+05:30",
+  "source": "Cloud Run logs for successful live case (~13:04Z) + evaluate extracts (~12:39Z); Vertex Gemini 2.5 Flash list prices USD→INR @84",
+  "token_usage_one_full_live_case": {
+    "analyze_Process": { "in": 462, "out": 1147 },
+    "discover_OpportunitySet": { "in": 1414, "out": 1091 },
+    "brief_BriefDraft": { "in": 1670, "out": 1681 },
+    "evaluate_4x_ExtractedProposalDraft": {
+      "in": 5319,
+      "out": 1942,
+      "note": "sum of four extracts; rationale often template (0 tokens) under proxy budget"
+    },
+    "questions_note": "Need-driven questions are mostly code/heuristic; any model question rewrite is small vs the above",
+    "totals": { "in_tokens": 8865, "out_tokens": 5861 }
+  },
+  "list_price_gemini_2_5_flash_usd_per_1m": {
+    "input": 0.30,
+    "output": 2.50,
+    "source": "Vertex AI Gemini pricing page (Flash 2.5 text, approximate; confirm in Billing)"
+  },
+  "estimated_model_cost_per_case": {
+    "usd": 0.0173,
+    "inr": 1.45,
+    "calc": "(8865/1e6)*0.30 + (5861/1e6)*2.50"
+  },
+  "demo_budget_inr": 2000,
+  "cases_affordable_at_budget": 1379,
+  "caps_chosen": {
+    "GLOBAL_DAILY_CASE_CAP": 40,
+    "DAILY_CASE_CAP": 3,
+    "rationale": "Cost/case is small vs INR 2000; keep GLOBAL=40 as a hard spend + abuse brake (judges share the pool). DAILY=3 so one judge can finish one live run + retries + sample (sample uncapped)."
+  },
+  "billing_page_note": "Cloud Billing console did not expose a per-case SKU line in CLI; estimate is from logged tokens × list price. Reconcile against Billing → Reports filtered to Vertex AI after judging."
+}

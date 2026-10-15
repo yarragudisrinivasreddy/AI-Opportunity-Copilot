@@ -169,6 +169,9 @@ fieldset.card legend{padding:0 var(--s2);font:600 var(--t-1) var(--f-body)}
 .confirm{position:sticky;bottom:0;margin-top:var(--s5);padding:var(--s4);background:var(--paper);border:1.5px solid var(--ink);border-radius:var(--r-lg);display:flex;gap:var(--s4);align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:var(--e2);z-index:5}
 .confirm p{max-width:28rem;font-size:var(--t-0);color:var(--ink-2)}
 .legend{display:flex;gap:var(--s4);flex-wrap:wrap;margin-bottom:var(--s5);font-size:var(--t-0);color:var(--ink-2);align-items:center}
+.legend-tools{margin-left:auto;display:flex;gap:12px;align-items:center;flex:0 0 auto}
+.legend-tools .btn{white-space:nowrap;min-width:9.5rem;flex-shrink:0}
+@media(max-width:720px){.legend-tools{margin-left:0;width:100%;justify-content:space-between}}
 
 /* banner */
 .banner{position:relative;border-radius:var(--r-lg);overflow:hidden;color:#fff;margin-bottom:var(--s6);min-height:9rem;isolation:isolate;display:flex;align-items:flex-end}

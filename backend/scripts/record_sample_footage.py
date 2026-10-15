@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -64,56 +65,58 @@ def main() -> int:
         hold(page, 18)  # 0:00–0:18 Home
         shot(page, "01_home.png")
 
-        # Show frame: open own briefly for shot, then home → sample
+        # 0:18–0:45 Show + sample → Understand
         page.get_by_test_id("start-own").click()
         page.get_by_test_id("show").wait_for()
-        hold(page, 2)
+        hold(page, 6)
         shot(page, "02_show.png")
         page.get_by_test_id("brand-home").click()
         page.get_by_test_id("home").wait_for()
-        hold(page, 1)
-
+        hold(page, 3)
         page.get_by_test_id("try-sample").click()
         page.get_by_test_id("process-map").wait_for()
-        # pad remaining of 0:18–0:45 (~25s already partly used)
-        hold(page, 8)
+        hold(page, 14)
         shot(page, "03_understand.png")
-        hold(page, 12)  # toward 1:15
 
+        # 0:45–1:15 Understand → Questions
+        hold(page, 10)
         page.get_by_test_id("confirm-map").click()
         page.get_by_test_id("questions").wait_for()
-        hold(page, 3)
+        hold(page, 5)
         shot(page, "04_questions.png")
         for _ in range(3):
             page.get_by_test_id("question").locator("button.btn-quiet").first.click()
-            hold(page, 2.5)
+            hold(page, 3.5)
 
+        # 1:15–1:45 Discover (+ flow view)
         page.get_by_test_id("discover").wait_for()
-        hold(page, 4)
-        # flow view + concept
+        hold(page, 6)
         page.get_by_test_id("flow").scroll_into_view_if_needed()
-        hold(page, 2)
+        hold(page, 4)
         if page.get_by_test_id("concept-btn").count():
             page.get_by_test_id("concept-btn").click()
-            hold(page, 1.5)
+            hold(page, 2)
         shot(page, "05_discover.png")
-        hold(page, 12)
+        hold(page, 16)
 
+        # 1:45–2:05 Brief
         page.locator("[data-testid^='select-opportunity-']").first.click()
         page.get_by_test_id("brief-view").wait_for()
-        hold(page, 8)
+        hold(page, 10)
         shot(page, "06_brief.png")
-        hold(page, 8)
+        hold(page, 10)
 
+        # 2:05–2:35 Compare
         page.get_by_test_id("to-compare").click()
         page.get_by_test_id("evaluation-view").wait_for()
-        hold(page, 12)
+        hold(page, 16)
         shot(page, "07_compare.png")
-        hold(page, 18)  # through ~2:35–2:50
+        hold(page, 14)
 
+        # 2:35–2:50 Close / Home
         page.get_by_test_id("brand-home").click()
         page.get_by_test_id("home").wait_for()
-        hold(page, 8)
+        hold(page, 15)
 
         elapsed = time.perf_counter() - t0
         context.close()
@@ -128,20 +131,50 @@ def main() -> int:
     # Prefer mp4 via ffmpeg if available
     dest_mp4 = OUT / "sample_journey_en_1080p.mp4"
     ff = shutil.which("ffmpeg")
+    if not ff:
+        for candidate in (
+            Path(os.environ.get("LOCALAPPDATA", ""))
+            / "Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe"
+            / "ffmpeg-9.0.2-full_build/bin/ffmpeg.exe",
+        ):
+            if candidate.is_file():
+                ff = str(candidate)
+                break
     if ff:
-        subprocess_ok = os.system(
-            f'"{ff}" -y -i "{dest_webm}" -c:v libx264 -pix_fmt yuv420p -movflags +faststart "{dest_mp4}"'
+        completed = subprocess.run(
+            [
+                ff,
+                "-y",
+                "-i",
+                str(dest_webm),
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+                "-movflags",
+                "+faststart",
+                str(dest_mp4),
+            ],
+            check=False,
         )
-        print("ffmpeg_exit", subprocess_ok)
+        print("ffmpeg_exit", completed.returncode)
     else:
-        # keep webm; copy name note
         print("ffmpeg_missing; left webm")
     meta = {
         "base": BASE,
+        "script": "docs/VIDEO_SCRIPT_AND_SHOTLIST.md",
+        "language": "en",
         "elapsed_s": round(elapsed, 1),
-        "screens": sorted(p.name for p in SCREENS.glob("*.png")),
+        "target_duration_s": 170,
+        "browser_zoom": "120%",
+        "cursor": "scripted, no jitter",
+        "console_visible": False,
+        "secrets_visible": False,
+        "screens": [f"screens/{p.name}" for p in sorted(SCREENS.glob("*.png"))],
+        "discover_includes_flow_view": True,
         "video_webm": str(dest_webm.name),
         "video_mp4": str(dest_mp4.name) if dest_mp4.exists() else None,
+        "video_mp4_bytes": dest_mp4.stat().st_size if dest_mp4.exists() else None,
         "viewport": "1600x900@1.2 → 1920x1080",
     }
     (OUT / "footage_meta.json").write_text(

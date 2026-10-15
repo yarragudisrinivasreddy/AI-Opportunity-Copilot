@@ -23,12 +23,24 @@ logger = logging.getLogger("app.llm.vertex")
 _R = TypeVar("_R")
 # Transient Vertex / gateway errors worth backing off.
 _RETRYABLE = re.compile(r"\b(429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|Too Many Requests)\b", re.I)
+# Primary-model missing / wrong ID — not worth retrying; fall through to GEMINI_FALLBACK_MODEL.
+_FALLBACK_ELIGIBLE = re.compile(
+    r"\b(429|503|RESOURCE_EXHAUSTED|UNAVAILABLE|Too Many Requests|404|NOT_FOUND|"
+    r"Invalid Endpoint|Publisher model)\b",
+    re.I,
+)
 
 
 def is_retryable_llm_error(exc: BaseException) -> bool:
     """True when the failure is a transient 429/503-class Vertex error."""
     text = f"{type(exc).__name__}: {exc}"
     return bool(_RETRYABLE.search(text))
+
+
+def is_fallback_eligible_error(exc: BaseException) -> bool:
+    """True when primary failure should try GEMINI_FALLBACK_MODEL (quota or missing model)."""
+    text = f"{type(exc).__name__}: {exc}"
+    return bool(_FALLBACK_ELIGIBLE.search(text))
 
 
 def call_with_backoff(
@@ -171,10 +183,11 @@ class VertexGeminiClient:
         try:
             response = _call(self._model)
         except Exception as exc:  # SDK raises several transport/API error types
-            if self._fallback and is_retryable_llm_error(exc):
+            if self._fallback and is_fallback_eligible_error(exc):
                 logger.warning(
-                    "primary model %s exhausted after retries; trying fallback %s",
+                    "primary model %s failed after retries (%s); trying fallback %s",
                     self._model,
+                    type(exc).__name__,
                     self._fallback,
                 )
                 used_model = self._fallback

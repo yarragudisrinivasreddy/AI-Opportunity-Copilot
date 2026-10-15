@@ -1,0 +1,137 @@
+{
+  "base": "https://y-srinivasreddy.web.app",
+  "axe": [
+    {
+      "screen": "home",
+      "scheme": "light",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "understand",
+      "scheme": "light",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "questions",
+      "scheme": "light",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "discover",
+      "scheme": "light",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "brief",
+      "scheme": "light",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "compare",
+      "scheme": "light",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "home",
+      "scheme": "dark",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "understand",
+      "scheme": "dark",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "questions",
+      "scheme": "dark",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "discover",
+      "scheme": "dark",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "brief",
+      "scheme": "dark",
+      "violations": [],
+      "all": 0
+    },
+    {
+      "screen": "compare",
+      "scheme": "dark",
+      "violations": [],
+      "all": 0
+    }
+  ],
+  "keyboard": {
+    "status": "PASS",
+    "detail": "Tab to Try sample + Enter through confirm/questions/brief/compare"
+  },
+  "reduced_motion": {
+    "status": "PASS",
+    "elements_with_motion_gt_50ms": 0,
+    "detail": "prefers-reduced-motion: reduce; tolerate ≤5 residual transitions"
+  },
+  "overflow_320": [
+    {
+      "lang": "en",
+      "screen": "home",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "overflow": false
+    },
+    {
+      "lang": "en",
+      "screen": "compare",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "overflow": false
+    },
+    {
+      "lang": "hi",
+      "screen": "home",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "overflow": false
+    },
+    {
+      "lang": "hi",
+      "screen": "compare",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "overflow": false
+    },
+    {
+      "lang": "te",
+      "screen": "home",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "overflow": false
+    },
+    {
+      "lang": "te",
+      "screen": "compare",
+      "scrollWidth": 320,
+      "clientWidth": 320,
+      "overflow": false
+    }
+  ],
+  "summary": {
+    "axe_serious_critical_total": 0,
+    "axe_status": "PASS",
+    "keyboard_status": "PASS",
+    "reduced_motion_status": "PASS",
+    "overflow_status": "PASS"
+  }
+}

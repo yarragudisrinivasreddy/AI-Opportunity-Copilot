@@ -3,7 +3,12 @@ from __future__ import annotations
 
 import pytest
 
-from app.llm.vertex import VertexGeminiClient, call_with_backoff, is_retryable_llm_error
+from app.llm.vertex import (
+    VertexGeminiClient,
+    call_with_backoff,
+    is_fallback_eligible_error,
+    is_retryable_llm_error,
+)
 
 
 def test_is_retryable_detects_429_and_503():
@@ -75,8 +80,15 @@ def test_non_retryable_raises_immediately():
     assert n["i"] == 1 and sleeps == []
 
 
+def test_fallback_eligible_includes_404_and_invalid_endpoint():
+    assert is_fallback_eligible_error(RuntimeError("404 NOT_FOUND Publisher model"))
+    assert is_fallback_eligible_error(RuntimeError("400 Invalid Endpoint name"))
+    assert is_fallback_eligible_error(RuntimeError("429 RESOURCE_EXHAUSTED"))
+    assert not is_fallback_eligible_error(RuntimeError("400 INVALID_ARGUMENT schema"))
+
+
 def test_fallback_model_used_after_primary_retries(monkeypatch):
-    """GEMINI_FALLBACK_MODEL is only used after primary retries fail on 429/503."""
+    """GEMINI_FALLBACK_MODEL is used after primary fails on quota or missing model."""
     from pydantic import BaseModel
 
     class Tiny(BaseModel):
@@ -88,7 +100,7 @@ def test_fallback_model_used_after_primary_retries(monkeypatch):
         def generate_content(self, *, model, contents, config):  # noqa: ARG002
             calls.append(model)
             if model == "primary-model":
-                raise RuntimeError("429 RESOURCE_EXHAUSTED")
+                raise RuntimeError("404 NOT_FOUND Publisher model missing")
 
             class R:
                 text = '{"x": 1}'

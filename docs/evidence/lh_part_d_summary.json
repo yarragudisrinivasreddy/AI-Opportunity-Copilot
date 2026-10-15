@@ -1,0 +1,30 @@
+{
+  "home": {
+    "file": "lh_home_mobile.json",
+    "scores": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100
+    }
+  },
+  "compare": {
+    "file": "lh_compare_mobile.json",
+    "scores": {
+      "performance": 97,
+      "accessibility": 100,
+      "best-practices": 100
+    }
+  },
+  "summary": {
+    "home_mobile": {
+      "performance": 100,
+      "accessibility": 100,
+      "best-practices": 100
+    },
+    "compare_mobile": {
+      "performance": 97,
+      "accessibility": 100,
+      "best-practices": 100
+    }
+  }
+}

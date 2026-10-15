@@ -1,0 +1,64 @@
+{
+  "as_of": "2026-10-15T20:20+05:30",
+  "live_url": "https://y-srinivasreddy.web.app",
+  "api": "https://opportunity-copilot-api-814609847961.us-central1.run.app",
+  "api_revision": "opportunity-copilot-api-00021-s4s",
+  "caps": {
+    "GLOBAL_DAILY_CASE_CAP": 40,
+    "DAILY_CASE_CAP": 3,
+    "VISUALS_ENABLED": false,
+    "UPLOADS_ENABLED": false,
+    "GCP_LOCATION": "global",
+    "GEMINI_MODEL": "gemini-2.5-flash",
+    "GEMINI_FALLBACK_MODEL": "gemini-2.0-flash-001"
+  },
+  "gates": [
+    { "id": "pytest_focused", "status": "PASS", "detail": "test_vertex_backoff + test_evaluator + test_injection_pii (26 tests)" },
+    { "id": "typecheck_build", "status": "PASS", "detail": "tsc --noEmit + vite build OK; Hosting live released" },
+    {
+      "id": "e2e",
+      "status": "PASS",
+      "detail": "e2e_sample_only + e2e_browser LIVE TEXT FLOW OK on https://y-srinivasreddy.web.app (sample + own-process through evaluate). API revision 00021-s4s with global Gemini + fallback + evaluate max_workers=2."
+    },
+    {
+      "id": "axe_per_screen_light_dark",
+      "status": "PASS",
+      "detail": "part_d_sample_a11y.json: 6 screens × light+dark = 0 serious/critical axe violations (wcag2a/aa)."
+    },
+    {
+      "id": "lighthouse_mobile_home_compare",
+      "status": "PASS",
+      "detail": "Home mobile a11y/perf/BP 100/100/100; Compare mobile 100/97/100 (lh_part_d_summary.json)."
+    },
+    {
+      "id": "keyboard_run",
+      "status": "PASS",
+      "detail": "Tab to Try sample + Enter through confirm/questions/brief/compare on sample path."
+    },
+    {
+      "id": "reduced_motion",
+      "status": "PASS",
+      "detail": "prefers-reduced-motion: reduce; ≤5 residual transitions >50ms (part_d_sample_a11y.json)."
+    },
+    {
+      "id": "overflow_320_en_hi_te",
+      "status": "PASS",
+      "detail": "Home + Compare @320px: no horizontal overflow for en, hi, te."
+    },
+    {
+      "id": "apex_rule_scan",
+      "status": "PASS",
+      "detail": "p_apexml hard-flagged by rule scan (override_instructions, rank_me_first, dismiss_competitors, address_the_model). Advisory UI badge flag_advisory without rank cap. Dev attack regression numbers stay in EVALUATION.md / apex_rule_scan.json only."
+    },
+    {
+      "id": "secrets_scan",
+      "status": "PASS",
+      "detail": "Prior gitleaks history clean; deploy.env.yaml gitignored; no secrets in docs/ (secrets_scan_report.json)."
+    },
+    {
+      "id": "rollback_note",
+      "status": "PASS",
+      "detail": "Previous API tip before this session's successful deploy: opportunity-copilot-api-00019-9rs. Hosting live at https://y-srinivasreddy.web.app."
+    }
+  ]
+}
