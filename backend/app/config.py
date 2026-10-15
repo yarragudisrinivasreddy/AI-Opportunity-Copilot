@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     gcp_project: str = ""
     gcp_location: str = ""  # TBD: choose a region that offers the chosen Gemini model
     gemini_model: str = ""  # TBD: set after verifying current Vertex AI model IDs
+    # Tried only after primary GEMINI_MODEL retries on 429/503 are exhausted.
+    gemini_fallback_model: str = ""
     media_bucket: str = ""
 
     allowed_origins: str = "http://localhost:5173"
@@ -34,8 +36,14 @@ class Settings(BaseSettings):
     # When false, photo/video upload is rejected; text descriptions still work.
     # Keep false in production until Cloud Vision + DLP are verified on real frames.
     uploads_enabled: bool = True
+    # Concept pictures (Vertex image). Default off until smoke_image + caps clear.
+    visuals_enabled: bool = False
+    gemini_image_model: str = ""  # set after verifying Model Garden ID/location
+    visuals_daily_cap: int = 15
+    visuals_per_uid_daily: int = 2
     # Named Native Firestore DB (default (default) may be Datastore-mode in older projects).
     firestore_database: str = "(default)"
+
 
     @model_validator(mode="after")
     def _production_guard(self) -> "Settings":

@@ -20,7 +20,7 @@ Record here before promote:
 | Live release name / version ID | **FILL BEFORE PROMOTE** (`npx firebase-tools hosting:releases:list --project y-srinivasreddy --limit 5`) |
 | Prior git commit on live | `c83fcf4` (pre-overhaul `main` at branch cut) |
 | Overhaul branch tip at dry-run | `0fed95a` on `ux-overhaul` |
-| Preview channel | `ux-preview` → https://y-srinivasreddy--ux-preview-aspk3ryv.web.app (version `502c642e893a7799`, expires 2026-10-28) |
+| Preview channel | `ux-preview` → https://y-srinivasreddy--ux-preview-aspk3ryv.web.app (current `1c6f03ebb86ff777`; previous Round-3 tip `7f5a68df2181ffb2`) |
 
 ## Rollback
 

@@ -1,26 +1,27 @@
-# UX overhaul size report (`ux-overhaul`)
+# UX / premium UI size report (`ux-overhaul`)
 
-Portal Builder Cup size rule: **not confirmed in portal from this session** — shipping **lean/** only (~162 KB images). Re-check before merge if the portal hard-caps near 1 MB.
+Portal Builder Cup size rule: **not confirmed in portal** — re-check before merge. Prefer lean assets; fonts are large.
 
-## Images (lean → `frontend/public/img/`)
+## Baseline before premium-ui port (commit ~`7386de9` / prior dist)
 
-| File | Bytes |
+| Asset | Bytes |
 |---|---|
-| hero-work-400.webp | 8,348 |
-| hero-work-800.webp | 19,720 |
-| hero-work-1600.webp | 51,822 |
-| factory-network-800.webp | 35,228 |
-| compare-pillars-800.webp | 9,406 |
-| privacy-glass-800.webp | 11,792 |
-| workshop-dawn-800.webp | 30,058 |
-| **Total** | **166,374** (~162.5 KiB) |
+| Main app JS | 172,205 |
+| CSS | 10,440 |
+| Images (prior lean set) | 166,374 |
+| Fonts | 0 (system) |
 
-## JS/CSS bundle (Vite `frontend/dist`)
+**Honesty:** no fake-LLM or FakeImageClient numbers belong in the deck, video, or `evalRuns`.
 
-| Asset | Before (c83fcf4-era) | After |
-|---|---|---|
-| Main app JS | 164,927 | 172,205 (+7.3 KB) |
-| CSS | 4,132 | 10,440 |
-| Firebase/auth chunks | ~248 KB combined | unchanged (~248 KB) |
+## After premium-ui-v2 fidelity port (`npm run build`)
 
-Hero is the only preloaded image (`hero-work` srcset). Other images are lazy + async decode.
+| Asset | Bytes |
+|---|---|
+| Main app JS (`index-MeWLK-k4.js`) | **231,270** |
+| CSS (`index-Bnt7SApI.css`) | **30,900** |
+| Images (`frontend/public/img/`) | **178,364** |
+| Fonts (`frontend/public/fonts/`) | **431,928** |
+
+v2 adds journey/jstep/media DOM + packs; uploads remain off in production until Part 2b.
+
+Hero remains the only preloaded image. Indic fonts use `unicode-range` (downloaded only when glyphs appear).

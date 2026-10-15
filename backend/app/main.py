@@ -64,7 +64,12 @@ def create_app(settings: Settings | None = None, context: AppContext | None = No
     @app.exception_handler(LLMError)
     async def _llm(_: Request, exc: LLMError):
         logger.error("model failure: %s", exc)
-        return err(502, "analysis failed; please try again or use the sample case")
+        # Plain copy for the UI Retry button + sample-case link (App.tsx error-banner).
+        return err(
+            503,
+            "The AI service is busy right now. Tap Retry in a moment, or open Try the sample case "
+            "(no sign-in, no model cost).",
+        )
 
     @app.exception_handler(ValueError)
     async def _value(_: Request, exc: ValueError):
@@ -82,3 +87,7 @@ def create_app(settings: Settings | None = None, context: AppContext | None = No
 
 def app_factory() -> FastAPI:  # uvicorn --factory app.main:app_factory
     return create_app()
+
+
+# Buildpacks that look for `app.app` (and some local runners) use this instance.
+app = create_app()

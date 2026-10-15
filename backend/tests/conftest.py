@@ -12,6 +12,20 @@ from app.llm.fake import FakeLLM
 from app.main import create_app
 
 
+@pytest.fixture(autouse=True)
+def _isolate_settings_env(monkeypatch):
+    """Developer shell/.env must not break tests (e.g. PRIVACY_MODE=local, UPLOADS_ENABLED=false)."""
+    monkeypatch.setenv("PRIVACY_MODE", "fake")
+    monkeypatch.setenv("LLM_MODE", "fake")
+    monkeypatch.setenv("AUTH_MODE", "dev")
+    monkeypatch.setenv("STORE_MODE", "memory")
+    monkeypatch.setenv("MEDIA_MODE", "memory")
+    monkeypatch.setenv("UPLOADS_ENABLED", "true")
+    monkeypatch.setenv("VISUALS_ENABLED", "false")
+    monkeypatch.setenv("ENV", "test")
+
+
+
 def make_jpeg(size=(320, 240), seed=1) -> bytes:
     import random
 
@@ -33,7 +47,18 @@ def jpeg() -> bytes:
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings(env="test", daily_case_cap=3, rate_limit_per_minute=1000)
+    # Force test-safe modes so a developer .env cannot break the fixture.
+    return Settings(
+        env="test",
+        auth_mode="dev",
+        llm_mode="fake",
+        store_mode="memory",
+        media_mode="memory",
+        privacy_mode="fake",
+        daily_case_cap=3,
+        rate_limit_per_minute=1000,
+        visuals_enabled=False,
+    )
 
 
 @pytest.fixture

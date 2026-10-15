@@ -1,7 +1,10 @@
 /** Same-origin responsive WebP. Hero uses full lean srcset; others use 800px lean files. */
 import type { ImgHTMLAttributes } from "react";
 
-type ImgKind = "hero-work" | "factory-network" | "compare-pillars" | "privacy-glass" | "workshop-dawn";
+type ImgKind =
+  | "hero-work" | "factory-network" | "compare-pillars" | "privacy-glass" | "workshop-dawn"
+  | "paper-flow" | "tablet-check" | "golden-plant"
+  | "concept-opp-a" | "concept-opp-b" | "concept-opp-c";
 
 const META: Record<ImgKind, { w: number; h: number; files: { src: string; w: number }[] }> = {
   "hero-work": {
@@ -16,6 +19,12 @@ const META: Record<ImgKind, { w: number; h: number; files: { src: string; w: num
   "compare-pillars": { w: 800, h: 450, files: [{ src: "/img/compare-pillars-800.webp", w: 800 }] },
   "privacy-glass": { w: 800, h: 450, files: [{ src: "/img/privacy-glass-800.webp", w: 800 }] },
   "workshop-dawn": { w: 800, h: 450, files: [{ src: "/img/workshop-dawn-800.webp", w: 800 }] },
+  "paper-flow": { w: 800, h: 450, files: [{ src: "/img/paper-flow-800.webp", w: 800 }] },
+  "tablet-check": { w: 800, h: 450, files: [{ src: "/img/tablet-check-800.webp", w: 800 }] },
+  "golden-plant": { w: 800, h: 450, files: [{ src: "/img/golden-plant-800.webp", w: 800 }] },
+  "concept-opp-a": { w: 800, h: 450, files: [{ src: "/img/concept-opp-a-800.webp", w: 800 }] },
+  "concept-opp-b": { w: 800, h: 450, files: [{ src: "/img/concept-opp-b-800.webp", w: 800 }] },
+  "concept-opp-c": { w: 800, h: 450, files: [{ src: "/img/concept-opp-c-800.webp", w: 800 }] },
 };
 
 export function Picture({
@@ -37,7 +46,7 @@ export function Picture({
       alt={alt}
       loading={priority ? "eager" : "lazy"}
       decoding={priority ? "sync" : "async"}
-      {...(priority ? { fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement> : {})}
+      {...(priority ? { fetchPriority: "high" } as ImgHTMLAttributes<HTMLImageElement> : {})}
     />
   );
 }

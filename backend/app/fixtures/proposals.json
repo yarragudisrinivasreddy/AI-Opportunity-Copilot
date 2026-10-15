@@ -82,7 +82,7 @@
         "dashboard"
       ],
       "timeline_weeks": 18.0,
-      "cost_inr": 740000.0,
+      "cost_inr": 2400000.0,
       "team": "Three developers",
       "similar_projects": [
         {
@@ -124,7 +124,49 @@
         }
       ]
     },
-    "rawText": "Solution approach: Digitise checklists and results capture with a tablet workflow and daily reports.\nArchitecture: Tablet app, central database and a reporting dashboard.\nTechnologies: tablet app, database, dashboard\nTimeline: 18 weeks\nCost: INR 740,000\nTeam: Three developers\nSimilar project: logistics - digital checklists and reporting. Outcome: Paperless records\nRisk: Scope may grow\nRisk: Training time Mitigation: Short onboarding session for staff\nSupport: Six weeks of support\nExpected outcome: Paperless recording of results\nR1: We will test the system with your team and share results.\nR3: We will collect examples from your records as needed during the build and set up simple storage for them.\nR4: Delivery in 18 weeks in three milestones covering design, build, and rollout with sign-off at each stage.\nR5: Integration with your current spreadsheet is supported through scheduled exports and imports that run every night."
+    "rawText": "Solution approach: Digitise checklists and results capture with a tablet workflow and daily reports.\nArchitecture: Tablet app, central database and a reporting dashboard.\nTechnologies: tablet app, database, dashboard\nTimeline: 18 weeks\nCost: INR 2,400,000\nTeam: Three developers\nSimilar project: logistics - digital checklists and reporting. Outcome: Paperless records\nRisk: Scope may grow\nRisk: Training time Mitigation: Short onboarding session for staff\nSupport: Six weeks of support\nExpected outcome: Paperless recording of results\nR1: We will test the system with your team and share results.\nR3: We will collect examples from your records as needed during the build and set up simple storage for them.\nR4: Delivery in 18 weeks in three milestones covering design, build, and rollout with sign-off at each stage.\nR5: Integration with your current spreadsheet is supported through scheduled exports and imports that run every night."
+  },
+  "p_docuflow": {
+    "structured": {
+      "provider_id": "p_docuflow",
+      "solution_approach": "Lightweight document capture with a basic dashboard.",
+      "architecture": "Hosted form and file store.",
+      "technologies": [
+        "web form",
+        "cloud storage"
+      ],
+      "timeline_weeks": 14.0,
+      "cost_inr": 480000.0,
+      "team": "One developer",
+      "similar_projects": [
+        {
+          "vertical": "insurance",
+          "problem_type": "claims intake forms",
+          "outcome": "Forms online"
+        }
+      ],
+      "risks": [
+        {
+          "risk": "Unclear scope",
+          "mitigation": null
+        }
+      ],
+      "support": "Email support",
+      "expected_outcomes": [
+        "Less paper"
+      ],
+      "requirement_responses": [
+        {
+          "requirement_id": "R1",
+          "response": "We will look at quality."
+        },
+        {
+          "requirement_id": "R4",
+          "response": "About 14 weeks."
+        }
+      ]
+    },
+    "rawText": "Solution approach: Lightweight document capture with a basic dashboard.\nArchitecture: Hosted form and file store.\nTechnologies: web form, cloud storage\nTimeline: 14 weeks\nCost: INR 480,000\nTeam: One developer\nSimilar project: insurance - claims intake forms. Outcome: Forms online\nRisk: Unclear scope\nSupport: Email support\nExpected outcome: Less paper\nR1: We will look at quality.\nR4: About 14 weeks."
   },
   "p_apexml": {
     "structured": {

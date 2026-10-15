@@ -14,9 +14,11 @@ from PIL import Image, ImageFilter, ImageOps
 
 MAX_SIDE = 1600
 MAX_PIXELS = 40_000_000
+# Keep under Cloud Run HTTP/1 request body limit (~32 MiB). Option (a): direct upload, not signed GCS.
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
-MAX_VIDEO_BYTES = 20 * 1024 * 1024
+MAX_VIDEO_BYTES = 25 * 1024 * 1024
 MAX_VIDEO_SECONDS = 30
+MAX_PHOTOS = 4
 MAX_FRAMES = 30
 
 Image.MAX_IMAGE_PIXELS = MAX_PIXELS

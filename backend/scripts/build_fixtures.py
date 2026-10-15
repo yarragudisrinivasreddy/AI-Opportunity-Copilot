@@ -68,7 +68,7 @@ PROPOSALS = {
         "solution_approach": "Digitise checklists and results capture with a tablet workflow and daily reports.",
         "architecture": "Tablet app, central database and a reporting dashboard.",
         "technologies": ["tablet app", "database", "dashboard"],
-        "timeline_weeks": 18, "cost_inr": 740000,
+        "timeline_weeks": 18, "cost_inr": 2400000,
         "team": "Three developers",
         "similar_projects": [
             {"vertical": "logistics", "problem_type": "digital checklists and reporting", "outcome": "Paperless records"},
@@ -84,6 +84,26 @@ PROPOSALS = {
             {"requirement_id": "R3", "response": "We will collect examples from your records as needed during the build and set up simple storage for them."},
             {"requirement_id": "R4", "response": "Delivery in 18 weeks in three milestones covering design, build, and rollout with sign-off at each stage."},
             {"requirement_id": "R5", "response": "Integration with your current spreadsheet is supported through scheduled exports and imports that run every night."},
+        ],
+    }),
+    "p_docuflow": Proposal.model_validate({
+        "provider_id": "p_docuflow",
+        "solution_approach": "Lightweight document capture with a basic dashboard.",
+        "architecture": "Hosted form and file store.",
+        "technologies": ["web form", "cloud storage"],
+        "timeline_weeks": 14, "cost_inr": 480000,
+        "team": "One developer",
+        "similar_projects": [
+            {"vertical": "insurance", "problem_type": "claims intake forms", "outcome": "Forms online"},
+        ],
+        "risks": [
+            {"risk": "Unclear scope", "mitigation": None},
+        ],
+        "support": "Email support",
+        "expected_outcomes": ["Less paper"],
+        "requirement_responses": [
+            {"requirement_id": "R1", "response": "We will look at quality."},
+            {"requirement_id": "R4", "response": "About 14 weeks."},
         ],
     }),
     "p_apexml": Proposal.model_validate({
@@ -125,7 +145,7 @@ def main() -> None:
         "exception_handling": "A supervisor verifies each failed item",
         "data_availability": "We have some saved inspection photos",
     }
-    opps, explanation = OpportunityAgent(llm).discover(process, answers)
+    opps, explanation, _flow_audit = OpportunityAgent(llm).discover(process, answers)
     brief = BriefAgent(llm).generate(
         opps[0], process, answers, target_timeline_weeks=12, budget_low_inr=800000, budget_high_inr=1200000
     )

@@ -30,6 +30,68 @@ def _text(parts: Sequence[Part]) -> str:
 def _process(system: str, parts: Sequence[Part]) -> Process:
     n_frames = sum(isinstance(p, ImagePart) for p in parts)
     ref = "frame_0" if n_frames else "description"
+    blob = _text(parts).lower()
+    # Vary by description so industry evidence scripts are not identical.
+    if "patient" in blob or "nurse" in blob or "clinic" in blob or "prescription" in blob:
+        return Process.model_validate(
+            {
+                "process_name": "Patient prescription and charting",
+                "environment": "Clinic reception and consulting rooms",
+                "actors": ["nurse", "doctor", "pharmacist"],
+                "tools": ["paper chart", "desktop system"],
+                "steps": [
+                    {"id": "s1", "text": "Patient checks in at the clinic reception desk", "kind": "observation", "evidence_ref": ref},
+                    {"id": "s2", "text": "A nurse writes vitals on a paper chart", "kind": "observation", "evidence_ref": ref, "data_entry": True},
+                    {"id": "s3", "text": "The doctor reviews the chart and writes a prescription by hand", "kind": "observation", "evidence_ref": ref},
+                    {"id": "s4", "text": "The pharmacist re-enters the same details into a desktop system", "kind": "observation", "evidence_ref": ref, "data_entry": True},
+                    {"id": "s5", "text": "Failed prescriptions are called back to the doctor by phone", "kind": "observation", "evidence_ref": ref, "decision_point": True},
+                ],
+                "pain_points": [
+                    {"text": "The same prescription details are written and retyped by different people", "kind": "assumption"}
+                ],
+                "missing_fields": ["volume", "time_per_unit", "exception_handling", "data_availability", "systems_used"],
+            }
+        )
+    if "parcel" in blob or "courier" in blob or "logistics" in blob or "day book" in blob:
+        return Process.model_validate(
+            {
+                "process_name": "Inbound parcel desk logging",
+                "environment": "Logistics inbound desk",
+                "actors": ["clerk", "courier"],
+                "tools": ["day book", "Excel", "tracking spreadsheet"],
+                "steps": [
+                    {"id": "s1", "text": "Inbound parcels are scanned once at the door", "kind": "observation", "evidence_ref": ref},
+                    {"id": "s2", "text": "Parcels are written into a day book", "kind": "observation", "evidence_ref": ref, "data_entry": True},
+                    {"id": "s3", "text": "A clerk prints route sheets from Excel for couriers", "kind": "observation", "evidence_ref": ref},
+                    {"id": "s4", "text": "The clerk marks failed deliveries on paper and retypes them into the tracking spreadsheet", "kind": "observation", "evidence_ref": ref, "data_entry": True, "decision_point": True},
+                ],
+                "pain_points": [
+                    {"text": "Failed deliveries are retyped overnight into the tracking spreadsheet", "kind": "assumption"}
+                ],
+                "missing_fields": ["volume", "time_per_unit", "exception_handling", "data_availability", "systems_used"],
+            }
+        )
+    if "steel" in blob or "vernier" in blob or "security writes" in blob or "challan" in blob:
+        return Process.model_validate(
+            {
+                "process_name": "Raw material receiving and inspection",
+                "environment": "Factory gate and inspection bay",
+                "actors": ["Security", "store clerk", "inspector", "supervisor"],
+                "tools": ["paper register", "vernier caliper", "printed sheet", "Excel"],
+                "steps": [
+                    {"id": "s1", "text": "Trucks arrive with steel wire and bar stock", "kind": "observation", "evidence_ref": ref},
+                    {"id": "s2", "text": "Security writes the vehicle in a paper register", "kind": "observation", "evidence_ref": ref, "data_entry": True},
+                    {"id": "s3", "text": "The store clerk matches the delivery challan to the purchase order by hand", "kind": "observation", "evidence_ref": ref},
+                    {"id": "s4", "text": "An inspector measures five pieces with a vernier caliper and writes on a printed sheet", "kind": "observation", "evidence_ref": ref, "data_entry": True},
+                    {"id": "s5", "text": "At day end someone types the sheet into Excel", "kind": "observation", "evidence_ref": ref, "data_entry": True},
+                    {"id": "s6", "text": "Failed lots are phoned to the supervisor", "kind": "observation", "evidence_ref": ref, "decision_point": True},
+                ],
+                "pain_points": [
+                    {"text": "Failed lots are only noticed after phone calls and delayed Excel entry", "kind": "assumption"}
+                ],
+                "missing_fields": ["volume", "time_per_unit", "exception_handling", "data_availability", "systems_used"],
+            }
+        )
     return Process.model_validate(
         {
             "process_name": "Manual product quality inspection",
@@ -189,9 +251,10 @@ def _rationale(system: str, parts: Sequence[Part]) -> RationaleDraft:
     points = [
         RationalePoint(proposal_id=top, criterion=c, score=v, field_path=_PATHS[c]) for c, v in best
     ]
+    overall_pct = int(round(float(scores[top]["overall"]) * 100))
     return RationaleDraft(
         recommended_proposal_id=top,
-        summary=f"{top} ranks first with an overall score of {scores[top]['overall']}.",
+        summary=f"{top} ranks first with an overall score of {overall_pct}%.",
         points=points,
     )
 

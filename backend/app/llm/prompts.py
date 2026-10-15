@@ -45,7 +45,13 @@ OPPORTUNITY_SYSTEM = (
     "not_ai_explanation.\n"
     "- Base every rating on the confirmed process steps and user answers. Use data_availability="
     "'unknown' when the user has not said whether data exists.\n"
-    "- evidence_refs must reference step ids (s1...) or answer field keys.\n" + SECURITY_PREAMBLE
+    "- evidence_refs must reference step ids (s1...) or answer field keys.\n"
+    "- For each opportunity include flow: 3 to 5 rows of {today, after, kind}. kind is one of "
+    "same|change|remove|human. today should echo a process step when possible. Include at least "
+    "one kind=human when human_oversight_required is true.\n"
+    "- Write user-facing title, description and flow text in the language named in the user "
+    "message (en, hi or te). Do not translate enums, numbers, currency symbols or provider names.\n"
+    + SECURITY_PREAMBLE
 )
 
 BRIEF_SYSTEM = (

@@ -36,6 +36,26 @@ def test_flagged_proposal_has_injection_removed_before_extraction():
     assert r6.status == "not_covered"
 
 
+def test_model_detected_alone_does_not_hard_flag_or_rank_cap():
+    """Vertex sometimes sets model_detected_injection on clean LeanBuild text."""
+    from app.core import injection
+
+    clean = TEXTS["p_leanbuild"]
+    assert not injection.scan(clean).detected
+
+    def force_model_flag(system, parts):
+        return ExtractedProposalDraft(model_detected_injection=True)
+
+    ev = BidEvaluator(FakeLLM({ExtractedProposalDraft: force_model_flag})).evaluate(
+        "b1", BRIEF, {"p_leanbuild": clean, "p_visionworks": TEXTS["p_visionworks"]}, Weights()
+    )
+    lean = next(e for e in ev.extracted if e.proposal_id == "p_leanbuild")
+    assert lean.injection_flag.detected is False
+    assert "model_detected" in lean.injection_flag.reasons
+    assert "injection_flagged:p_leanbuild" not in ev.flags
+    assert set(ev.ranking) == {"p_leanbuild", "p_visionworks"}
+
+
 def test_every_dev_attack_fails_to_improve_the_attacked_proposal():
     base = run(texts={"p_leanbuild": TEXTS["p_leanbuild"], "p_visionworks": TEXTS["p_visionworks"]})
     base_scores = {s.proposal_id: s for s in base.scores}
@@ -101,7 +121,8 @@ def test_extractor_unknown_requirement_ids_are_ignored_and_missing_added():
 
 def test_weights_change_ranking_deterministically():
     cheap_first = BidEvaluator(FakeLLM()).evaluate("b1", BRIEF, TEXTS, Weights(technical_fit=0.0, experience=0.0, timeline=0.0, cost=1.0, risk=0.0))
-    assert cheap_first.ranking[0] == "p_leanbuild"
+    # p_docuflow is the lowest cost in the sample set (p_leanbuild is the overpriced role).
+    assert cheap_first.ranking[0] == "p_docuflow"
 
 
 def test_same_input_same_output():

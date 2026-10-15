@@ -71,6 +71,30 @@ def test_overall_and_ranking_tiebreak():
     assert scoring.rank(scores, {"c": 900000, "d": 900000}) == ["c", "d"]  # id tiebreak is stable
 
 
+def test_flagged_proposal_ranks_below_all_clean():
+    """Steering-attempt bids cannot outrank clean ones even with better content scores."""
+    strong_flagged = ex("flagged", cost=700000, weeks=10)  # would otherwise win on cost/overall
+    weak_clean = ex(
+        "clean",
+        cov=("partial", "not_covered", "not_covered", "partial"),
+        proj=("adjacent",),
+        weeks=20,
+        cost=1_500_000,
+        risks=(False,),
+        hil=False,
+        data=False,
+    )
+    scores = scoring.score_all([strong_flagged, weak_clean], Weights(), CTX)
+    by_id = {s.proposal_id: s for s in scores}
+    assert by_id["flagged"].overall > by_id["clean"].overall
+    ranking = scoring.rank(
+        scores,
+        {"flagged": strong_flagged.cost_inr, "clean": weak_clean.cost_inr},
+        flagged_ids={"flagged"},
+    )
+    assert ranking == ["clean", "flagged"]
+
+
 def test_context_inference_is_flagged():
     ctx = scoring.build_context(None, None, None, [ex("a", weeks=10, cost=700000), ex("b", weeks=14, cost=900000)])
     assert set(ctx.flags) == {"target_timeline_inferred", "budget_inferred"}

@@ -1,8 +1,13 @@
 export type Kind = "observation" | "assumption";
+export type FlowKind = "same" | "change" | "remove" | "human";
 export interface Step { id: string; text: string; kind: Kind; evidence_ref: string | null; manual: boolean; decision_point: boolean; data_entry: boolean }
 export interface Process { process_name: string; environment: string; actors: string[]; tools: string[]; steps: Step[]; pain_points: { text: string; kind: Kind; evidence_ref: string | null }[]; missing_fields: string[] }
 export interface Rubric { repetitive_work: string; data_availability: string; ai_feasibility: string; business_impact: string; implementation_complexity: string; human_oversight_required: boolean; rule_based_sufficient: boolean }
-export interface Opportunity { id: string; title: string; description: string; rubric: Rubric; strength: number; recommendation: string; flags: string[]; evidence_refs: string[] }
+export interface FlowRow { today: string; after: string; kind: FlowKind }
+export interface Opportunity {
+  id: string; title: string; description: string; rubric: Rubric; strength: number;
+  recommendation: string; flags: string[]; evidence_refs: string[]; flow?: FlowRow[];
+}
 export interface Brief {
   problem: string; current_workflow: string[]; proposed_solution: string;
   ai_approaches: { approach: string; reason: string }[]; required_data: string[]; integrations: string[];
@@ -18,7 +23,7 @@ export interface Evaluation {
   rationale: { recommended_proposal_id: string; summary: string; points: { proposal_id: string; criterion: string; score: number; field_path: string }[] };
   extracted: { proposal_id: string; injection_flag: { detected: boolean; reasons: string[]; removed_segments: number } }[];
 }
-export interface Question { field: string; text: string; index: number }
+export interface Question { field: string; text: string; index: number; total?: number }
 
 /** Everything the UI renders, whether it comes from the sample or a live case. */
 export interface ViewModel {

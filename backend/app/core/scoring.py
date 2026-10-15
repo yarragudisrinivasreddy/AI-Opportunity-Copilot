@@ -106,12 +106,29 @@ def score_all(
     return results
 
 
-def rank(scores: list[ProposalScore], costs: dict[str, float | None]) -> list[str]:
-    """Higher overall first; ties broken by technical fit, then lower cost, then id."""
+def rank(
+    scores: list[ProposalScore],
+    costs: dict[str, float | None],
+    *,
+    flagged_ids: set[str] | frozenset[str] | None = None,
+) -> list[str]:
+    """Higher overall first; ties broken by technical fit, then lower cost, then id.
+
+    Flagged (steering-attempt) proposals are capped below every unflagged proposal
+    regardless of content scores — they cannot outrank a clean bid.
+    """
+    flagged = flagged_ids or frozenset()
 
     def key(s: ProposalScore) -> tuple:
         c = costs.get(s.proposal_id)
-        return (-s.overall, -s.criteria["technical_fit"], c if c else float("inf"), s.proposal_id)
+        # 0 = clean (ranks first group), 1 = flagged (always after all clean)
+        return (
+            1 if s.proposal_id in flagged else 0,
+            -s.overall,
+            -s.criteria["technical_fit"],
+            c if c else float("inf"),
+            s.proposal_id,
+        )
 
     return [s.proposal_id for s in sorted(scores, key=key)]
 

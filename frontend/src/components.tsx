@@ -1,9 +1,53 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { api } from "./api";
+import { flowFor } from "./flow";
 import { inr, label, pct } from "./format";
-import type { Brief, Evaluation, Opportunity, Process, ProposalDoc, Provider, Step } from "./types";
+import { Icon, JOURNEY_STAGES, type IconName } from "./icons";
+import { useI18n } from "./i18n";
+import { Picture } from "./Picture";
+import type { Brief, Evaluation, FlowKind, FlowRow, Opportunity, Process, ProposalDoc, Provider, Step } from "./types";
 
-export function Badge({ kind, children }: { kind: "obs" | "assume" | "sim" | "warn" | "ok"; children: React.ReactNode }) {
-  return <span className={`badge badge-${kind}`}>{children}</span>;
+export function Badge({ kind, children }: { kind: "obs" | "asm" | "sim" | "ok" | "est" | "warn"; children: React.ReactNode }) {
+  const cls = kind === "obs" ? "b-obs" : kind === "asm" ? "b-asm" : kind === "sim" ? "b-sim" : kind === "ok" ? "b-ok" : kind === "est" ? "b-est" : "b-asm";
+  return <span className={`badge ${cls}`}>{children}</span>;
+}
+
+export function SheetHead({
+  stage, title, sub, caseName, hideTitle = false,
+}: {
+  stage: "show" | "understand" | "questions" | "discover" | "brief" | "proposals";
+  title: string;
+  sub?: string;
+  caseName?: string;
+  /** When the page already has a banner heading (Compare), skip the duplicate h1. */
+  hideTitle?: boolean;
+}) {
+  const { t } = useI18n();
+  // Count STAGES (5). Questions shares Understand as step 2.
+  const stageIdx = JOURNEY_STAGES.findIndex((s) => s.stages.includes(stage));
+  const stepI = String(stageIdx + 1);
+  const stepN = String(JOURNEY_STAGES.length);
+  return (
+    <>
+      <div className="titleblock">
+        <div><small>{t("case_label")}</small><strong>{caseName || t("case_name")}</strong></div>
+        <div><small>{t("step_label")}</small><strong>{t("step_of", { i: stepI, n: stepN })}</strong></div>
+      </div>
+      <ol className="jstep" aria-label={`${t("step_label")} ${t("step_of", { i: stepI, n: stepN })}`} data-testid="stepper">
+        {JOURNEY_STAGES.map((s, n) => {
+          const cur = s.stages.includes(stage);
+          return (
+            <li key={s.key} className={n < stageIdx ? "done" : cur ? "now" : ""} aria-current={cur ? "step" : undefined}>
+              <span className="jn"><Icon name={s.key as IconName} /></span>
+              <span className="jl">{t(s.key)}</span>
+            </li>
+          );
+        })}
+      </ol>
+      {hideTitle ? <h1 className="sr">{title}</h1> : <h1 className="h-page">{title}</h1>}
+      {sub ? <p className="sub">{sub}</p> : null}
+    </>
+  );
 }
 
 function newStep(i: number): Step {
@@ -18,10 +62,14 @@ function newStep(i: number): Step {
   };
 }
 
-/** Accessible process map: vertical list with connector; keyboard reorder via Up/Down. */
-export function ProcessMap({ process, editable, onChange }: {
+export function ProcessMap({ process, editable, onChange, onAddRef }: {
   process: Process; editable?: boolean; onChange?: (p: Process) => void;
+  onAddRef?: (add: () => void) => void;
 }) {
+  const { t, sample } = useI18n();
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draftText, setDraftText] = useState("");
+
   const update = (i: number, text: string) =>
     onChange?.({ ...process, steps: process.steps.map((s, j) => (j === i ? { ...s, text } : s)) });
   const remove = (i: number) => onChange?.({ ...process, steps: process.steps.filter((_, j) => j !== i) });
@@ -32,132 +80,238 @@ export function ProcessMap({ process, editable, onChange }: {
     [steps[i], steps[j]] = [steps[j], steps[i]];
     onChange?.({ ...process, steps });
   };
-  const add = () => onChange?.({ ...process, steps: [...process.steps, newStep(process.steps.length)] });
+  const add = () => {
+    const s = newStep(process.steps.length);
+    s.text = t("new_step");
+    onChange?.({ ...process, steps: [...process.steps, s] });
+    setEditing(s.id);
+    setDraftText(s.text);
+  };
+  useEffect(() => { onAddRef?.(add); });
+
+  const evFor = (s: Step, i: number) => {
+    if (s.manual) return t("added_by");
+    if (s.kind === "observation") {
+      return (sample.ev_obs ?? "Your description, sentence {n}").replace("{n}", String(i + 2));
+    }
+    const asms = sample.ev_asm ?? [];
+    const obsCount = process.steps.filter((x) => x.kind === "observation").length;
+    return asms[i - obsCount] ?? t("leg_asm");
+  };
 
   return (
-    <section className="process-map" aria-labelledby="map-h" data-testid="process-map">
-      <h2 id="map-h">{process.process_name}</h2>
-      {process.environment && <p className="muted">{process.environment}</p>}
-      <ol className="process-steps" aria-label="Process steps in order">
-        {process.steps.map((s, i) => (
-          <li key={s.id} className="process-step">
-            <div className="step-head">
-              {s.kind === "observation"
-                ? <Badge kind="obs">Observation{s.evidence_ref ? `: ${s.evidence_ref}` : ""}</Badge>
-                : <Badge kind="assume">Assumption</Badge>}
-              {s.decision_point && <Badge kind="ok">Decision</Badge>}
-              {s.data_entry && <Badge kind="ok">Data entry</Badge>}
-            </div>
-            {editable ? (
-              <>
-                <label className="sr" htmlFor={`step-${s.id}`}>Step {i + 1} text</label>
-                <input id={`step-${s.id}`} value={s.text} maxLength={500} onChange={(e) => update(i, e.target.value)} />
-                <div className="step-actions">
-                  <button type="button" className="ghost" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`Move step ${i + 1} up`}>Up</button>
-                  <button type="button" className="ghost" disabled={i === process.steps.length - 1} onClick={() => move(i, 1)} aria-label={`Move step ${i + 1} down`}>Down</button>
-                  {process.steps.length > 1 && (
-                    <button type="button" className="ghost" onClick={() => remove(i)} aria-label={`Remove step ${i + 1}`}>Remove</button>
-                  )}
+    <section aria-labelledby="map-h" data-testid="process-map">
+      <h2 id="map-h" className="sr">{process.process_name}</h2>
+      <ol className="route" aria-label="Process steps in order">
+        {process.steps.map((s, i) => {
+          const isEd = editable && editing === s.id;
+          return (
+            <li key={s.id} className={s.kind === "observation" ? "obs" : "asm"} data-testid={`step-${s.id}`}>
+              <span className="node" aria-hidden="true">{i + 1}</span>
+              <div className={`step${isEd ? " editing" : ""}`}>
+                <div className="step-top">
+                  {s.kind === "observation"
+                    ? <Badge kind="obs">{t("obs")}</Badge>
+                    : <Badge kind="asm">{s.manual ? t("asm_added") : t("asm")}</Badge>}
                 </div>
-              </>
-            ) : (
-              <p>{s.text}</p>
-            )}
-          </li>
-        ))}
-      </ol>
-      {editable && (
-        <div className="row">
-          <button type="button" className="secondary" onClick={add} data-testid="add-step">Add step</button>
-        </div>
-      )}
-      {process.pain_points.length > 0 && (
-        <>
-          <h3>Pain points</h3>
-          <ul>{process.pain_points.map((p, i) => (
-            <li key={i}>{p.text}{" "}
-              <Badge kind={p.kind === "observation" ? "obs" : "assume"}>{p.kind === "observation" ? "Observation" : "Assumption"}</Badge>
+                {isEd ? (
+                  <textarea
+                    aria-label={t("edit_aria", { i: String(i + 1) })}
+                    data-testid={`edit-${s.id}`}
+                    value={draftText}
+                    maxLength={500}
+                    rows={3}
+                    onChange={(e) => setDraftText(e.target.value)}
+                  />
+                ) : (
+                  <h3>{s.text}</h3>
+                )}
+                <p className="ev">
+                  <b>{s.kind === "observation" ? t("evidence") : t("why")}</b>
+                  {evFor(s, i)}
+                </p>
+                {editable && (
+                  <div className="step-tools">
+                    {isEd ? (
+                      <>
+                        <button type="button" className="btn btn-primary btn-sm" onClick={() => { update(i, draftText.trim() || s.text); setEditing(null); }}>{t("save")}</button>
+                        <button type="button" className="btn btn-quiet btn-sm" onClick={() => setEditing(null)}>{t("cancel")}</button>
+                      </>
+                    ) : (
+                      <>
+                        <button type="button" className="icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label={t("up", { i: String(i + 1) })}><Icon name="up" /></button>
+                        <button type="button" className="icon-btn" disabled={i === process.steps.length - 1} onClick={() => move(i, 1)} aria-label={t("down", { i: String(i + 1) })}><Icon name="down" /></button>
+                        <button type="button" className="icon-btn" onClick={() => { setEditing(s.id); setDraftText(s.text); }} aria-label={t("edit", { i: String(i + 1) })}><Icon name="edit" /></button>
+                        {process.steps.length > 1 && (
+                          <button type="button" className="icon-btn" onClick={() => remove(i)} aria-label={t("del", { i: String(i + 1) })}><Icon name="del" /></button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </li>
-          ))}</ul>
-        </>
-      )}
+          );
+        })}
+      </ol>
     </section>
   );
 }
 
-export function OpportunityCard({ o, selected, onSelect }: { o: Opportunity; selected: boolean; onSelect?: () => void }) {
+export function OpportunityCard({ o, selected, onSelect, letter, best }: {
+  o: Opportunity; selected: boolean; onSelect?: () => void; letter?: string; best?: boolean;
+}) {
+  const { t } = useI18n();
   return (
-    <article className={`card ${selected ? "selected" : ""}`} aria-labelledby={`o-${o.id}`} data-testid={`opportunity-${o.id}`}>
+    <article
+      className={`card opp${best ? " best" : ""}${selected ? " selected" : ""}`}
+      aria-labelledby={`o-${o.id}`}
+      data-testid={letter ? `opp-${letter}` : `opportunity-${o.id}`}
+    >
+      {best && <div className="verdict v-simple">{t("best")}</div>}
       <h3 id={`o-${o.id}`}>{o.title}</h3>
       <dl className="opp-meta">
-        <div><dt>Problem</dt><dd>{o.description}</dd></div>
-        <div><dt>Improvement</dt><dd>{o.recommendation}</dd></div>
-        <div><dt>Value</dt><dd>{label(o.rubric.business_impact)} business impact · strength {o.strength} of 15</dd></div>
-        <div><dt>Effort</dt><dd>{label(o.rubric.implementation_complexity)} to implement · AI feasibility {label(o.rubric.ai_feasibility)}</dd></div>
-        <div><dt>Where people stay involved</dt><dd>{o.rubric.human_oversight_required ? "Human oversight required" : "Low ongoing oversight expected"}</dd></div>
+        <div><dt>{t("problem")}</dt><dd>{o.description}</dd></div>
+        <div><dt>{t("improvement")}</dt><dd>{o.recommendation}</dd></div>
+        <div><dt>{t("value")}</dt><dd>{label(o.rubric.business_impact)} · strength {o.strength}/15</dd></div>
+        <div><dt>{t("effort")}</dt><dd><Badge kind="est">{t("estimate")}</Badge> {label(o.rubric.implementation_complexity)}</dd></div>
+        <div><dt>{t("humans")}</dt><dd>{o.rubric.human_oversight_required ? "Human oversight required" : "Low ongoing oversight"}</dd></div>
       </dl>
-      {o.flags.length > 0 && <ul className="flags">{o.flags.map((f) => <li key={f}>{f}</li>)}</ul>}
-      {onSelect && (
-        <button type="button" onClick={onSelect} aria-pressed={selected} data-testid={`select-opportunity-${o.id}`}>
-          {selected ? "Selected" : "Select this opportunity"}
-        </button>
-      )}
+      <div className="opp-foot">
+        {o.flags.length > 0 && <span className="hint">{o.flags.join(" · ")}</span>}
+        {onSelect && (
+          <button type="button" className={`btn btn-sm ${selected || best ? "btn-primary" : "btn-quiet"}`} onClick={onSelect} aria-pressed={selected} data-testid={`select-opportunity-${o.id}`}>
+            {t("write_brief")}
+          </button>
+        )}
+      </div>
     </article>
   );
 }
 
-export function BriefView({ brief }: { brief: Brief }) {
-  const [copied, setCopied] = useState(false);
-  const md = briefToMarkdown(brief);
-  const copy = async () => { await navigator.clipboard.writeText(md); setCopied(true); setTimeout(() => setCopied(false), 1500); };
-  const Section = ({ id, title, children, open }: { id: string; title: string; children: React.ReactNode; open?: boolean }) => (
-    <details open={open}><summary id={id}>{title}</summary><div>{children}</div></details>
-  );
+const KIND_KEY: Record<FlowKind, "f_same" | "f_change" | "f_remove" | "f_human"> = {
+  same: "f_same", change: "f_change", remove: "f_remove", human: "f_human",
+};
+
+export function FlowView({
+  opportunities, process, selectedId, onSelect, visualsEnabled, allowStockIllustration = false, isSample = false, caseId,
+}: {
+  opportunities: Opportunity[];
+  process?: Process;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  visualsEnabled: boolean;
+  /** Show shipped per-opportunity WebPs (sample always; live when VISUALS off). */
+  allowStockIllustration?: boolean;
+  /** Sample uses AI-example caption; live uses “not generated from your process”. */
+  isSample?: boolean;
+  caseId?: string | null;
+}) {
+  const { t } = useI18n();
+  const [concept, setConcept] = useState<"idle" | "busy" | "ready" | "off" | "hidden">("idle");
+  const [conceptUrl, setConceptUrl] = useState<string | null>(null);
+  const idx = Math.max(0, opportunities.findIndex((o) => o.id === selectedId));
+  const active = opportunities[idx] ?? opportunities[0];
+  const rows: FlowRow[] = active ? flowFor(active, process) : [];
+  const showBlock = visualsEnabled || allowStockIllustration;
+  const stockKind = (["concept-opp-a", "concept-opp-b", "concept-opp-c"] as const)[
+    Math.min(idx, 2)
+  ];
+
+  const showConcept = () => {
+    if (!allowStockIllustration && !visualsEnabled) {
+      setConcept("hidden");
+      return;
+    }
+    if (allowStockIllustration) {
+      setConcept("busy");
+      window.setTimeout(() => setConcept("ready"), 900);
+      return;
+    }
+    // Live Vertex path — only when kill switch is on.
+    if (!caseId || !active?.id) {
+      setConcept("off");
+      return;
+    }
+    setConcept("busy");
+    void api.visual(caseId, active.id).then((res) => {
+      if (res.status === "ready" && res.dataUrl) {
+        setConceptUrl(res.dataUrl);
+        setConcept("ready");
+      } else {
+        setConcept("off");
+      }
+    }).catch(() => setConcept("off"));
+  };
+
+  if (!opportunities.length) return null;
+
   return (
-    <section aria-labelledby="brief-h" className="brief" data-testid="brief-view">
-      <div className="row between">
-        <h2 id="brief-h">Build brief</h2>
-        <button type="button" className="ghost" onClick={copy} data-testid="copy-brief">{copied ? "Copied" : "Copy as Markdown"}</button>
+    <section aria-labelledby="flow-h" data-testid="flow" style={{ marginTop: 48 }}>
+      <h2 id="flow-h" className="h-page">{t("flow_h")}</h2>
+      <p className="sub" style={{ marginBottom: 16 }}>{t("flow_sub")}</p>
+      <div className="tabs" role="tablist" aria-label={t("flow_h")}>
+        {opportunities.map((o, i) => (
+          <button
+            key={o.id}
+            type="button"
+            className="tab"
+            role="tab"
+            id={`tab${i}`}
+            aria-selected={o.id === (selectedId ?? active?.id)}
+            aria-controls="flowpanel"
+            data-testid={`flow-tab-${i}`}
+            onClick={() => { onSelect(o.id); setConcept("idle"); }}
+          >
+            {t("pick")} {"ABC"[i]}
+          </button>
+        ))}
       </div>
-      <p className="notice" role="note" data-testid="brief-disclaimer">{brief.disclaimer}</p>
-      <p className="muted"><Badge kind="ok">proposal only</Badge> Status: {brief.status}</p>
-      <Section id="b-problem" title="Problem" open>{brief.problem}</Section>
-      <Section id="b-workflow" title="Current workflow" open>
-        <ol>{brief.current_workflow.map((s, i) => <li key={i}>{s}</li>)}</ol>
-      </Section>
-      <Section id="b-solution" title="Proposed solution" open><p>{brief.proposed_solution}</p></Section>
-      <Section id="b-ai" title="Approaches considered">
-        <ul>{brief.ai_approaches.map((a) => <li key={a.approach}><strong>{a.approach}</strong>: {a.reason}</li>)}</ul>
-      </Section>
-      <Section id="b-data" title="Required data">
-        <ul>{brief.required_data.map((d) => <li key={d}>{d}</li>)}</ul>
-      </Section>
-      {brief.integrations.length > 0 && (
-        <Section id="b-int" title="Integrations">
-          <ul>{brief.integrations.map((d) => <li key={d}>{d}</li>)}</ul>
-        </Section>
-      )}
-      <Section id="b-hitl" title="Where people stay involved">
-        <ul>{brief.human_in_the_loop.map((d) => <li key={d}>{d}</li>)}</ul>
-      </Section>
-      <Section id="b-out" title="Expected outcomes">
-        <Badge kind="warn">Estimate</Badge>
-        {brief.expected_outcomes.length ? brief.expected_outcomes.map((o) => (
-          <p key={o.metric}><strong>{o.metric}:</strong> {o.low} to {o.high} {o.unit}<br /><span className="muted">{o.assumption}</span></p>
-        )) : <p className="muted">No estimate shown: volume and time per item were not confirmed.</p>}
-      </Section>
-      <Section id="b-risks" title="Risks">
-        <ul>{brief.risks.map((r) => <li key={r.risk}>{r.risk}<br /><span className="muted">Ask providers: {r.mitigation_prompt}</span></li>)}</ul>
-      </Section>
-      <Section id="b-phases" title="Phases">
-        <ol>{brief.phases.map((p) => <li key={p.name}><strong>{p.name}</strong>: {p.description}<br /><span className="muted">Exit: {p.exit_criteria}</span></li>)}</ol>
-      </Section>
-      <Section id="b-assumptions" title="Assumptions">
-        <ul>{brief.assumptions.map((a) => <li key={a}>{a}</li>)}</ul>
-      </Section>
-      <Section id="b-reqs" title="Proposal requirements">
-        <ol>{brief.proposal_requirements.map((r, i) => <li key={r}><strong>R{i + 1}</strong> {r}</li>)}</ol>
-      </Section>
+      <div id="flowpanel" role="tabpanel" aria-labelledby={`tab${idx}`}>
+        <div className="fhead" aria-hidden="true">
+          <span>{t("today")}</span><span /><span>{t("after")}</span>
+        </div>
+        <ol className="flow">
+          {rows.map((r, i) => (
+            <li key={i} className="frow">
+              <div className="fcell today"><small>{t("today")}</small><span>{r.today}</span></div>
+              <div className="farrow" aria-hidden="true"><Icon name="arrow" /></div>
+              <div className={`fcell after k-${r.kind}`}>
+                <small>{t("after")}</small>
+                <span className="fk">{t(KIND_KEY[r.kind])}</span>
+                <span>{r.after}</span>
+              </div>
+            </li>
+          ))}
+        </ol>
+        {showBlock && (
+          <div className="vis" data-testid="concept-area">
+            <h3 style={{ fontSize: "var(--t-3)", fontStretch: "88%" }}>{t("vis_h")}</h3>
+            {concept === "idle" && (
+              <button type="button" className="btn btn-quiet" style={{ marginTop: 12 }} data-testid="concept-btn" onClick={showConcept}>
+                {allowStockIllustration ? t("vis_btn_example") : t("vis_btn")}
+              </button>
+            )}
+            {concept === "busy" && <p className="hint" role="status">{t("vis_busy")}</p>}
+            {concept === "off" && <div className="notice n-info" style={{ marginTop: 12 }} role="status">{t("vis_off")}</div>}
+            {concept === "ready" && allowStockIllustration && (
+              <figure data-testid="concept-example">
+                <Picture kind={stockKind} alt="" sizes="(max-width: 768px) 100vw, 640px" />
+                <figcaption>
+                  <Badge kind="est">{t("vis_example_badge")}</Badge>
+                  <span>{t(isSample ? "vis_example_cap" : "vis_live_example_cap")}</span>
+                </figcaption>
+              </figure>
+            )}
+            {concept === "ready" && !allowStockIllustration && conceptUrl && (
+              <figure data-testid="concept-live">
+                <img src={conceptUrl} alt="" style={{ width: "100%", height: "auto", borderRadius: "var(--r-md)" }} />
+                <figcaption><span>{t("vis_cap")}</span></figcaption>
+              </figure>
+            )}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
@@ -177,127 +331,226 @@ export function briefToMarkdown(b: Brief): string {
   ].join("\n\n");
 }
 
+export function BriefView({ brief }: { brief: Brief }) {
+  const { t } = useI18n();
+  const [copied, setCopied] = useState(false);
+  const md = briefToMarkdown(brief);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(md);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard blocked */ }
+  };
+  const Section = ({ title, children, open }: { title: string; children: React.ReactNode; open?: boolean }) => (
+    <details className="acc" open={open}><summary>{title}</summary><div className="body">{children}</div></details>
+  );
+  return (
+    <section aria-labelledby="brief-h" className="brief" data-testid="brief-view">
+      <div className="disclaimer" data-testid="disclaimer">
+        <b>{t("disc_b")}</b>{t("disc_d")}
+      </div>
+      <div className="brief-top">
+        <h2 id="brief-h">{t("brief_h")}</h2>
+        <button type="button" className="btn btn-quiet" onClick={copy} data-testid="copy-md">{copied ? t("copied") : t("copy_md")}</button>
+      </div>
+      <p className="notice n-info" role="note" data-testid="brief-disclaimer">{brief.disclaimer}</p>
+      <Section title="Problem" open>{brief.problem}</Section>
+      <Section title="Current workflow" open>
+        <ol>{brief.current_workflow.map((s, i) => <li key={i}>{s}</li>)}</ol>
+      </Section>
+      <Section title="Proposed solution" open><p>{brief.proposed_solution}</p></Section>
+      <Section title="Approaches considered">
+        <ul>{brief.ai_approaches.map((a) => <li key={a.approach}><strong>{a.approach}</strong>: {a.reason}</li>)}</ul>
+      </Section>
+      <Section title="Required data">
+        <ul>{brief.required_data.map((d) => <li key={d}>{d}</li>)}</ul>
+      </Section>
+      <Section title="Where people stay involved">
+        <ul>{brief.human_in_the_loop.map((d) => <li key={d}>{d}</li>)}</ul>
+      </Section>
+      <Section title="Phases">
+        <ol>{brief.phases.map((p) => <li key={p.name}><strong>{p.name}</strong>: {p.description}</li>)}</ol>
+      </Section>
+    </section>
+  );
+}
+
 export function ProviderCards({ providers, proposals }: { providers: Provider[]; proposals: ProposalDoc[] }) {
   const ids = new Set(proposals.map((p) => p.providerId));
   return (
-    <ul className="cards" data-testid="provider-cards">
-      {providers.filter((p) => ids.has(p.id)).map((p) => (
-        <li key={p.id} className="card">
-          <h3>{p.name}{" "}{p.simulated && <Badge kind="sim">Simulated</Badge>}</h3>
-          <p className="muted">{p.capabilities.join(", ")}</p>
-        </li>
+    <div className="pc" data-testid="provider-cards">
+      {providers.filter((p) => ids.has(p.id)).map((p, i) => (
+        <article key={p.id} className={`card pcard${i === 0 ? " first" : ""}`} data-testid={`provider-${i + 1}`}>
+          <h3>{p.name} {p.simulated && <Badge kind="sim">Simulated</Badge>}</h3>
+          <p className="hint">{p.capabilities.join(", ")}</p>
+        </article>
       ))}
-    </ul>
+    </div>
   );
 }
 
 const CRIT = ["technical_fit", "experience", "timeline", "cost", "risk"] as const;
 
+function scoresAsPercents(text: string): string {
+  return text.replace(/\b0\.\d+\b/g, (m) => `${Math.round(parseFloat(m) * 100)}%`);
+}
+
 export function EvaluationView({ ev, providers, proposals }: { ev: Evaluation; providers: Provider[]; proposals: ProposalDoc[] }) {
+  const { t } = useI18n();
   const name = (id: string) => providers.find((p) => p.id === id)?.name ?? id;
-  const readable = (text: string) => providers.reduce((t, p) => t.split(p.id).join(p.name), text);
-  const flagged = new Set(ev.extracted.filter((e) => e.injection_flag.detected).map((e) => e.proposal_id));
+  const readable = (text: string) => scoresAsPercents(
+    providers.reduce((acc, p) => acc.split(p.id).join(p.name), text),
+  );
+  const flaggedIds = ev.extracted.filter((e) => e.injection_flag.detected).map((e) => e.proposal_id);
+  const flagged = new Set(flaggedIds);
+  const flaggedName = flaggedIds.length ? name(flaggedIds[0]) : "";
+  const advisoryIds = ev.extracted
+    .filter((e) => !e.injection_flag.detected && (e.injection_flag.reasons || []).includes("model_detected"))
+    .map((e) => e.proposal_id);
+  const advisory = new Set(advisoryIds);
+  const advisoryName = advisoryIds.length ? name(advisoryIds[0]) : "";
   const byId = Object.fromEntries(ev.scores.map((s) => [s.proposal_id, s]));
   const sim = (id: string) => providers.find((p) => p.id === id)?.simulated ?? proposals.find((p) => p.providerId === id)?.simulated ?? true;
 
   return (
     <section aria-labelledby="eval-h" data-testid="evaluation-view">
-      <h2 id="eval-h">Proposal evaluation</h2>
-      <p className="notice" role="note">
-        Scores are computed by code from fields taken from each proposal. The ranking explanation cannot change those scores. Every provider shown is simulated.
-      </p>
-
-      <div className="compare-mobile" data-testid="compare-mobile">
+      <h2 id="eval-h" className="sr">{t("cmp_h")}</h2>
+      {flagged.size > 0 && (
+        <div className="notice n-warn" role="alert" data-testid="injection-notice" data-flagged-name={flaggedName}>
+          <div><b>{t("flagged_b")}</b>{t("flagged_d", { name: flaggedName })}</div>
+        </div>
+      )}
+      {advisory.size > 0 && (
+        <div className="notice n-info" role="status" data-testid="advisory-notice" data-advisory-name={advisoryName}>
+          <div><b>{t("advisory_b")}</b>{t("advisory_d", { name: advisoryName })}</div>
+        </div>
+      )}
+      <div className="pc" data-testid="compare-mobile">
         {ev.ranking.map((id, i) => {
           const s = byId[id];
           return (
-            <article key={id} className={`card ${i === 0 ? "selected" : ""}`} data-testid={`compare-card-${id}`}>
-              <p className="muted">Rank {i + 1}</p>
-              <h3>
-                {name(id)}{" "}
-                {sim(id) && <Badge kind="sim">Simulated</Badge>}{" "}
-                {flagged.has(id) && <Badge kind="warn">Injection attempt flagged</Badge>}
-              </h3>
-              <p><strong>Overall {pct(s.overall)}</strong>
-                {i === 0 ? " · Top match for this brief" : i === 1 ? " · Solid alternative" : " · Weaker fit on several criteria"}
-              </p>
-              <ul className="score-bars">
+            <article key={id} className={`card pcard${i === 0 ? " first" : ""}`} data-testid={`compare-card-${id}`}>
+              <div className="pc-head">
+                <span className="rank">{i + 1}</span>
+                <div>
+                  <h3>{name(id)}</h3>
+                  <div className="tags">
+                    {sim(id) && <Badge kind="sim">{t("sim")}</Badge>}
+                    {flagged.has(id) && <Badge kind="asm">{t("flag_steer")}</Badge>}
+                    {advisory.has(id) && <Badge kind="est">{t("flag_advisory")}</Badge>}
+                  </div>
+                </div>
+              </div>
+              <ul className="bars">
                 {CRIT.map((c) => (
                   <li key={c}>
-                    <div className="bar-row"><span>{label(c)}</span><span>{pct(s.criteria[c])}</span></div>
-                    <div className="bar-track" aria-hidden="true"><div className="bar-fill" style={{ width: `${Math.round(s.criteria[c] * 100)}%` }} /></div>
+                    <span>{label(c)}</span>
+                    <span className="bar-track"><span className="bar-fill" style={{ width: `${Math.round((s?.criteria[c] ?? 0) * 100)}%` }} /></span>
+                    <b>{pct(s?.criteria[c] ?? 0)}</b>
                   </li>
                 ))}
               </ul>
+              <p className="verd" data-testid={`overall-${id}`}>
+                <span>{t("overall")}</span>{" "}
+                <strong>{pct(s?.overall ?? 0)}</strong>
+              </p>
             </article>
           );
         })}
       </div>
-
-      <div className="compare-desktop scroll" data-testid="compare-desktop">
-        <table className="scores">
-          <caption className="sr">Scores per proposal and criterion, best first</caption>
+      <div className="tablewrap card" data-testid="compare-desktop">
+        <table>
+          <caption className="sr">{t("cap")}</caption>
           <thead>
             <tr>
-              <th scope="col">Rank</th>
-              <th scope="col">Provider</th>
+              <th scope="col">#</th>
+              <th scope="col">{t("provider")}</th>
               {CRIT.map((c) => <th key={c} scope="col">{label(c)}</th>)}
-              <th scope="col">Overall</th>
+              <th scope="col">{t("overall")}</th>
             </tr>
           </thead>
           <tbody>
             {ev.ranking.map((id, i) => (
-              <tr key={id} className={i === 0 ? "best" : ""}>
+              <tr key={id} data-flagged={flagged.has(id) ? "true" : undefined}>
                 <td>{i + 1}</td>
-                <th scope="row">
-                  {name(id)}{" "}
-                  {sim(id) && <Badge kind="sim">Simulated</Badge>}{" "}
-                  {flagged.has(id) && <Badge kind="warn">Injection attempt flagged</Badge>}
-                </th>
-                {CRIT.map((c) => <td key={c}>{pct(byId[id].criteria[c])}</td>)}
-                <td><strong>{pct(byId[id].overall)}</strong></td>
+                <td className="prov">
+                  <strong data-testid={`provider-name-${id}`}>{name(id)}</strong>
+                  <span className="tags">
+                    {sim(id) && <Badge kind="sim">{t("sim")}</Badge>}
+                    {flagged.has(id) && <Badge kind="asm">{t("flag_steer")}</Badge>}
+                    {advisory.has(id) && <Badge kind="est">{t("flag_advisory")}</Badge>}
+                  </span>
+                </td>
+                {CRIT.map((c) => <td key={c} className="n">{pct(byId[id]?.criteria[c] ?? 0)}</td>)}
+                <td className="n">{pct(byId[id]?.overall ?? 0)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      {flagged.size > 0 && (
-        <p className="notice warn" role="alert" data-testid="injection-notice">
-          Instruction-like text in a proposal was detected and removed before analysis. It did not affect any score.
-        </p>
-      )}
-      <h3>Recommendation: {name(ev.rationale.recommended_proposal_id)}</h3>
-      <p>{readable(ev.rationale.summary)}</p>
-      <ul>{ev.rationale.points.map((p, i) => (
-        <li key={i}>{name(p.proposal_id)}: {label(p.criterion)} {pct(p.score)}{" "}
-          <span className="muted">(evidence: {p.field_path})</span>
-        </li>
-      ))}</ul>
-      <p className="muted" data-testid="citations-state">
-        Explanation source: {ev.rationale_source}{ev.rationale_validated ? ", citations verified" : ", not verified"}.
-        {ev.flags.some((f) => f.endsWith("inferred")) && " Target timeline or budget was inferred from the proposals."}
-      </p>
-      <details>
-        <summary>Show submitted proposal text (untrusted input)</summary>
-        {proposals.map((p) => (
-          <div key={p.id}>
-            <h4>{name(p.providerId)} {p.simulated && <Badge kind="sim">Simulated</Badge>}</h4>
-            <pre className="raw">{p.rawText}</pre>
-          </div>
-        ))}
-      </details>
+      <p className="hint" style={{ marginTop: 16 }} data-testid="rationale-summary">{readable(ev.rationale.summary)}</p>
+      <span className="sr">{inr(0)}</span>
     </section>
   );
 }
 
-export function SkeletonBlock({ label }: { label: string }) {
+/** Modal process hint. List items tick when the caller advances `done` after real API steps — never a timer. */
+export function BusyPopup({
+  label, media, done = 0,
+}: {
+  label: string;
+  media?: boolean;
+  /** Count of finished sub-steps (0 = first in progress). */
+  done?: number;
+}) {
+  const { t } = useI18n();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const prevFocus = useRef<HTMLElement | null>(null);
+  const keys = media
+    ? (["busy_m1", "busy_m2", "busy_2", "busy_3"] as const)
+    : (["busy_1", "busy_2", "busy_3"] as const);
+  useEffect(() => {
+    prevFocus.current = document.activeElement as HTMLElement | null;
+    const panel = panelRef.current;
+    const focusable = panel?.querySelector<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+    (focusable ?? panel)?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || !panel) return;
+      const nodes = [...panel.querySelectorAll<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")];
+      if (!nodes.length) { e.preventDefault(); panel.focus(); return; }
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      prevFocus.current?.focus?.();
+    };
+  }, []);
   return (
-    <div aria-hidden="true" data-testid="skeleton">
-      <p className="muted">{label}</p>
-      <div className="skeleton block" /><div className="skeleton" /><div className="skeleton" />
+    <div className="busy-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="busy-h" aria-describedby="busy-d" data-testid="busy-popup">
+      <div className="busy-panel busy" ref={panelRef} tabIndex={-1}>
+        <h2 id="busy-h">{label}</h2>
+        <p id="busy-d" className="hint" role="status" aria-live="polite">{t("busy_p")}</p>
+        <ol data-testid="busy-steps" data-busy-done={String(done)}>
+          {keys.map((k, i) => {
+            const cls = i < done ? "ok" : i === done ? "on" : undefined;
+            return (
+              <li key={k} className={cls} data-testid={`busy-step-${i}`} data-state={cls ?? "pending"}>
+                {t(k)}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </div>
   );
 }
 
-export { inr };
+/** @deprecated use BusyPopup */
+export function SkeletonBlock({ label, media }: { label: string; media?: boolean }) {
+  return <BusyPopup label={label} media={media} />;
+}

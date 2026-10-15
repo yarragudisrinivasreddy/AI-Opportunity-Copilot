@@ -25,7 +25,12 @@ def build_llm(settings: Settings) -> LLMClient:
     if settings.llm_mode == "vertex":
         from app.llm.vertex import VertexGeminiClient
 
-        return VertexGeminiClient(settings.gcp_project, settings.gcp_location, settings.gemini_model)
+        return VertexGeminiClient(
+            settings.gcp_project,
+            settings.gcp_location,
+            settings.gemini_model,
+            fallback_model=settings.gemini_fallback_model,
+        )
     from app.llm.fake import FakeLLM
 
     return FakeLLM()
@@ -64,6 +69,8 @@ def build_context(settings: Settings, llm: LLMClient | None = None, repo=None, m
 
             detector = OpenCVFaceDetector()
 
+    from app.llm.image import build_image_client
+
     services = Services(
         repo=repo, media=media,
         vision=VisionProcessAgent(llm), opportunities=OpportunityAgent(llm),
@@ -73,6 +80,10 @@ def build_context(settings: Settings, llm: LLMClient | None = None, repo=None, m
         daily_case_cap=settings.daily_case_cap,
         global_daily_case_cap=settings.global_daily_case_cap,
         uploads_enabled=settings.uploads_enabled,
+        visuals_enabled=settings.visuals_enabled,
+        visuals_daily_cap=settings.visuals_daily_cap,
+        visuals_per_uid_daily=settings.visuals_per_uid_daily,
+        image_client=build_image_client(settings),
     )
     return AppContext(
         settings=settings,

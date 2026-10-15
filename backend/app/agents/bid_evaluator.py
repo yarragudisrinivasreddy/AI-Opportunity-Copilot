@@ -92,9 +92,15 @@ class BidEvaluator:
             logger.error("extraction failed for %s; scoring as empty", proposal_id)
             draft = ExtractedProposalDraft()
         draft = self._normalise(draft, [rid for rid, _ in reqs], set(segments))
+        # Hard flag (rank penalty + "steering" badge) = rule scan only.
+        # model_detected_injection is advisory: Vertex false-positives on clean
+        # overpriced bids (e.g. LeanBuild) must not cap rank or show a steering badge.
+        reasons = list(report.reasons)
+        if draft.model_detected_injection:
+            reasons.append("model_detected")
         flag = InjectionFlag(
-            detected=report.detected or draft.model_detected_injection,
-            reasons=report.reasons + (["model_detected"] if draft.model_detected_injection else []),
+            detected=report.detected,
+            reasons=reasons,
             removed_segments=report.removed_segments,
         )
         extracted = ExtractedProposal(
@@ -151,10 +157,11 @@ class BidEvaluator:
             for c, v in best
         ]
         strengths = " and ".join(c.replace("_", " ") for c, _ in best)
+        overall_pct = int(round(scores[top].overall * 100))
         return RationaleDraft(
             recommended_proposal_id=top,
             summary=(
-                f"{top} ranks first with an overall score of {scores[top].overall:.2f}. "
+                f"{top} ranks first with an overall score of {overall_pct}%. "
                 f"Its strongest areas are {strengths}."
             ),
             points=points,
@@ -163,14 +170,27 @@ class BidEvaluator:
     def evaluate(
         self, brief_id: str, brief: Brief, proposals: dict[str, Proposal | str], weights: Weights
     ) -> Evaluation:
-        extracted: list[ExtractedProposal] = []
-        flags: list[str] = []
-        for pid, p in proposals.items():
+        # Extract in parallel — sequential Vertex calls often exceed Hosting→Cloud Run's ~60s proxy budget.
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        def _one(pid: str, p: Proposal | str) -> tuple[str, ExtractedProposal, InjectionFlag]:
             text = render_proposal_text(p) if isinstance(p, Proposal) else p
             ex, flag = self.extract(pid, text, brief)
-            extracted.append(ex)
-            if flag.detected:
-                flags.append(f"injection_flagged:{pid}")
+            return pid, ex, flag
+
+        extracted: list[ExtractedProposal] = []
+        flags: list[str] = []
+        by_pid: dict[str, ExtractedProposal] = {}
+        # Cap concurrency at 2 to stay under Vertex per-minute quotas during evaluate.
+        with ThreadPoolExecutor(max_workers=min(2, max(1, len(proposals)))) as pool:
+            futs = [pool.submit(_one, pid, p) for pid, p in proposals.items()]
+            for fut in as_completed(futs):
+                pid, ex, flag = fut.result()
+                by_pid[pid] = ex
+                if flag.detected:
+                    flags.append(f"injection_flagged:{pid}")
+        # Stable order matching input proposals for deterministic downstream dumps.
+        extracted = [by_pid[pid] for pid in proposals]
 
         ctx = scoring.build_context(
             brief.target_timeline_weeks, brief.budget_low_inr, brief.budget_high_inr, extracted
@@ -179,7 +199,8 @@ class BidEvaluator:
         weights = scoring.validate_weights(weights)
         score_list = scoring.score_all(extracted, weights, ctx)
         costs = {e.proposal_id: e.cost_inr for e in extracted}
-        ranking = scoring.rank(score_list, costs)
+        flagged_ids = {e.proposal_id for e in extracted if e.injection_flag.detected}
+        ranking = scoring.rank(score_list, costs, flagged_ids=flagged_ids)
         scores = {s.proposal_id: s for s in score_list}
         extracted_by_id = {e.proposal_id: e for e in extracted}
 
@@ -188,7 +209,9 @@ class BidEvaluator:
             "scores": [s.model_dump() for s in score_list],
             "extracted": {k: v.model_dump() for k, v in extracted_by_id.items()},
         }
-        source = "model"
+        # Prefer fast template rationale; Hosting proxy ~60s — model rationale is optional polish.
+        rationale = self._template_rationale(ranking, scores)
+        source = "template"
         validated = True
         try:
             rationale = structured_call(
@@ -198,7 +221,9 @@ class BidEvaluator:
                 schema=RationaleDraft,
                 validator=lambda r: self._validate_rationale(r, ranking, scores, extracted_by_id),
                 temperature=0.2,
+                retries=0,
             )
+            source = "model"
         except LLMError:
             rationale = self._template_rationale(ranking, scores)
             source = "template"

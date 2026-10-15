@@ -9,8 +9,10 @@ from app.agents import questions
 from app.agents.bid_evaluator import BidEvaluator, render_proposal_text
 from app.agents.brief import BriefAgent
 from app.agents.opportunity import OpportunityAgent
+from app.agents.seed_proposals import seed_docs_for_brief
 from app.agents.vision_process import VisionProcessAgent, clean_user_text
 from app.core import privacy
+from app.core.flow import ensure_opportunity_flow
 from app.llm.client import LLMError
 from app.repo.base import MediaStore, Repository
 from app.schemas.brief import Brief
@@ -74,6 +76,10 @@ class Services:
     daily_case_cap: int = 5
     global_daily_case_cap: int = 40
     uploads_enabled: bool = True
+    visuals_enabled: bool = False
+    visuals_daily_cap: int = 15
+    visuals_per_uid_daily: int = 2
+    image_client: object | None = None
 
 
 class CaseService:
@@ -211,7 +217,9 @@ class CaseService:
         self._require(case, "analyzed")
         latest = self._latest(case_id, "process")
         q = questions.next_question(Process.model_validate(latest["data"]), self._answers(case_id))
-        return None if q is None else {"field": q.field, "text": q.text, "index": q.index}
+        return None if q is None else {
+            "field": q.field, "text": q.text, "index": q.index, "total": q.total,
+        }
 
     def add_answer(self, case_id: str, uid: str, field: str, answer: str) -> None:
         case = self._case(case_id, uid)
@@ -224,17 +232,24 @@ class CaseService:
             "answer": cleaned or "I don't know", "source": "user", "createdAt": _now(),
         })
 
-    def discover(self, case_id: str, uid: str) -> dict:
+    def discover(self, case_id: str, uid: str, *, language: str = "en") -> dict:
         case = self._case(case_id, uid)
         self._require(case, "confirmed")
         process = self._confirmed_process(case_id)
-        opps, explanation = self.s.opportunities.discover(process, self._answers(case_id))
+        lang = language if language in ("en", "hi", "te") else "en"
+        opps, explanation, flow_audit = self.s.opportunities.discover(
+            process, self._answers(case_id), language=lang,
+        )
         for o in opps:
             self.s.repo.put_doc(case_id, "opportunities", o.id, o.model_dump())
         self.s.repo.update_case(case_id, {"notAiExplanation": explanation})
         self._set_status(case, "discovered")
         self._audit(uid, "opportunities_discovered", case_id, count=len(opps))
-        return {"opportunities": [o.model_dump() for o in opps], "notAiExplanation": explanation}
+        return {
+            "opportunities": [ensure_opportunity_flow(o.model_dump(), process) for o in opps],
+            "notAiExplanation": explanation,
+            "flowAudit": flow_audit,
+        }
 
     def generate_brief(
         self, case_id: str, uid: str, opportunity_id: str, *,
@@ -263,15 +278,104 @@ class CaseService:
     def seed_proposals(self, case_id: str, uid: str) -> list[dict]:
         case = self._case(case_id, uid)
         self._require(case, "briefed")
-        out = []
-        for pid, item in self.s.seeded_proposals.items():
-            doc = {"id": pid, "providerId": pid, "simulated": True,
-                   "structured": item["structured"].model_dump(), "rawText": item["rawText"],
-                   "createdAt": _now()}
-            self.s.repo.put_doc(case_id, "proposals", pid, doc)
-            out.append(doc)
+        brief_doc = self._latest(case_id, "briefs")
+        brief = Brief.model_validate(brief_doc["data"])
+        # Four roles (strong / overpriced / thin / red-team), tailored to this brief's requirements.
+        out = seed_docs_for_brief(self.s.seeded_proposals, brief, now=_now())
+        if not out:
+            # Fallback: raw fixture texts if roles missing.
+            for pid, item in self.s.seeded_proposals.items():
+                doc = {"id": pid, "providerId": pid, "simulated": True,
+                       "structured": item["structured"].model_dump(), "rawText": item["rawText"],
+                       "createdAt": _now()}
+                out.append(doc)
+        for doc in out:
+            self.s.repo.put_doc(case_id, "proposals", doc["id"], doc)
         self._set_status(case, "proposals")
         return out
+
+    def generate_visual(self, case_id: str, uid: str, opportunity_id: str) -> dict:
+        """Concept picture for one opportunity. Caps + cache + face check. Kill-switch via visuals_enabled."""
+        import base64
+
+        from app.llm.image import FakeImageClient, downscale_under
+
+        if not self.s.visuals_enabled or self.s.image_client is None:
+            return {"status": "off", "reason": "Concept pictures are switched off right now."}
+        case = self._case(case_id, uid)
+        self._require(case, "discovered")
+        opps = {d["id"]: d for d in self.s.repo.list_docs(case_id, "opportunities")}
+        if opportunity_id not in opps:
+            raise NotFound("opportunity not found")
+        cache_key = f"visual_{opportunity_id}"
+        cached = self.s.repo.get_doc(case_id, "visuals", cache_key)
+        if cached and cached.get("dataUrl"):
+            return {"status": "ready", "cached": True, "dataUrl": cached["dataUrl"], "mime": cached.get("mime", "image/webp")}
+
+        # Caps: global + per-uid daily (reuse daily counter keys).
+        today = _now()[:10]
+        global_n = self.s.repo.get_daily_cases("__visual__", today)
+        if global_n >= self.s.visuals_daily_cap:
+            return {"status": "capped", "reason": "Today's concept-picture capacity is full."}
+        user_n = self.s.repo.get_daily_cases(f"__visual__:{uid}", today)
+        if user_n >= self.s.visuals_per_uid_daily:
+            return {"status": "capped", "reason": "You have reached today's concept-picture limit."}
+
+        title = (opps[opportunity_id].get("title") or "workplace process improvement")[:120]
+        prompt = (
+            f"flat editorial illustration of {title}, factory or clinic workbench, "
+            "no people, no faces, no readable text, no logos"
+        )
+        try:
+            raw = self.s.image_client.generate(prompt)
+        except Exception as exc:
+            logger.exception("visual generation failed")
+            return {"status": "error", "reason": str(exc)[:200]}
+
+        # Face check — reject if detector finds faces (concept prompts forbid people).
+        try:
+            boxes = self.s.detector.detect(raw) if not isinstance(self.s.image_client, FakeImageClient) else []
+            if boxes:
+                return {"status": "rejected", "reason": "Image contained faces and was discarded."}
+        except Exception:
+            logger.warning("face check skipped for visual", exc_info=True)
+
+        data, mime = downscale_under(raw, 250_000)
+        data_url = f"data:{mime};base64," + base64.b64encode(data).decode("ascii")
+        doc = {"id": cache_key, "opportunityId": opportunity_id, "dataUrl": data_url, "mime": mime, "createdAt": _now()}
+        self.s.repo.put_doc(case_id, "visuals", cache_key, doc)
+        self.s.repo.incr_daily_cases("__visual__", today)
+        self.s.repo.incr_daily_cases(f"__visual__:{uid}", today)
+        self._audit(uid, "visual_generated", case_id, opportunityId=opportunity_id)
+        return {"status": "ready", "cached": False, "dataUrl": data_url, "mime": mime}
+
+    def paste_proposal(self, case_id: str, uid: str, raw_text: str, provider_name: str) -> dict:
+        """Accept up to 5 pasted (untrusted) proposals alongside or instead of seeds."""
+        case = self._case(case_id, uid)
+        self._require(case, "briefed")
+        existing = self.s.repo.list_docs(case_id, "proposals")
+        pasted = [d for d in existing if d.get("pasted")]
+        if len(pasted) >= 5:
+            raise Conflict("at most 5 pasted proposals")
+        pid = f"pasted_{len(pasted) + 1}"
+        # Provider stub so the UI can name the card; evaluated as raw untrusted text.
+        provider = {
+            "id": pid,
+            "name": (provider_name or "Pasted proposal").strip()[:80],
+            "capabilities": ["pasted"],
+            "industries": [],
+            "typical_range_inr_min": 0,
+            "typical_range_inr_max": 0,
+            "simulated": False,
+        }
+        doc = {
+            "id": pid, "providerId": pid, "simulated": False, "pasted": True,
+            "rawText": raw_text.strip()[:20000], "structured": None,
+            "provider": provider, "createdAt": _now(),
+        }
+        self.s.repo.put_doc(case_id, "proposals", pid, doc)
+        self._set_status(case, "proposals")
+        return doc
 
     def evaluate(self, case_id: str, uid: str, weights: Weights | None) -> dict:
         case = self._case(case_id, uid)
@@ -302,7 +406,10 @@ class CaseService:
             "brief": self._latest(case_id, "briefs"),
             "proposals": self.s.repo.list_docs(case_id, "proposals"),
             "evaluation": self._latest(case_id, "evaluations"),
-            "providers": [p.model_dump() for p in self.s.providers],
+            "providers": [p.model_dump() for p in self.s.providers] + [
+                d["provider"] for d in self.s.repo.list_docs(case_id, "proposals")
+                if d.get("pasted") and d.get("provider")
+            ],
         }
 
     def delete_case(self, case_id: str, uid: str) -> None:

@@ -2,7 +2,12 @@
 from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
-from app.core.privacy import MAX_IMAGE_BYTES, MAX_VIDEO_BYTES
+from app.core.privacy import (
+    MAX_IMAGE_BYTES,
+    MAX_PHOTOS,
+    MAX_VIDEO_BYTES,
+    MAX_VIDEO_SECONDS,
+)
 from app.fixtures import loader
 from app.schemas.process import Process
 from app.schemas.proposal import Weights
@@ -50,6 +55,11 @@ class EvaluateIn(BaseModel):
     weights: Weights | None = None
 
 
+class PasteProposalIn(BaseModel):
+    raw_text: str = Field(min_length=40, max_length=20000)
+    provider_name: str = Field(default="Pasted proposal", max_length=80)
+
+
 @router.get("/sample")
 def sample() -> dict:
     """Read-only sample walkthrough. No auth, no model calls, no cost."""
@@ -64,13 +74,18 @@ def api_health(c=Depends(ctx)) -> dict:
 
 @router.get("/config")
 def public_config(c=Depends(ctx)) -> dict:
-    """Public client config. No auth."""
+    """Public client config. No auth. Limits match what the backend enforces."""
     return {
         "uploadsEnabled": c.settings.uploads_enabled,
         "uploadsDisabledMessage": (
             "Photo and video upload is temporarily unavailable. "
             "Describe your process in text instead."
         ),
+        "visualsEnabled": c.settings.visuals_enabled,
+        "maxPhotos": min(MAX_PHOTOS, c.settings.max_upload_files),
+        "maxPhotoBytes": MAX_IMAGE_BYTES,
+        "maxVideoBytes": MAX_VIDEO_BYTES,
+        "maxVideoSeconds": MAX_VIDEO_SECONDS,
     }
 
 
@@ -122,9 +137,26 @@ def answer(case_id: str, body: AnswerIn, user: User = Depends(current_user), c=D
     c.cases.add_answer(case_id, user.uid, body.field, body.answer)
 
 
+class DiscoverIn(BaseModel):
+    language: str = Field(default="en", max_length=8)
+
+
 @router.post("/cases/{case_id}/discover")
-def discover(case_id: str, user: User = Depends(current_user), c=Depends(ctx)) -> dict:
-    return c.cases.discover(case_id, user.uid)
+def discover(
+    case_id: str, body: DiscoverIn | None = None, user: User = Depends(current_user), c=Depends(ctx),
+) -> dict:
+    lang = (body.language if body else "en")
+    if lang not in ("en", "hi", "te"):
+        lang = "en"
+    return c.cases.discover(case_id, user.uid, language=lang)
+
+
+@router.post("/cases/{case_id}/opportunities/{opportunity_id}/visual")
+def opportunity_visual(
+    case_id: str, opportunity_id: str, user: User = Depends(current_user), c=Depends(ctx),
+) -> dict:
+    """Concept picture for one opportunity. Off by default (VISUALS_ENABLED=false)."""
+    return c.cases.generate_visual(case_id, user.uid, opportunity_id)
 
 
 @router.post("/cases/{case_id}/brief")
@@ -140,6 +172,14 @@ def brief(case_id: str, body: BriefIn, user: User = Depends(current_user), c=Dep
 @router.post("/cases/{case_id}/proposals/seed")
 def seed(case_id: str, user: User = Depends(current_user), c=Depends(ctx)) -> list[dict]:
     return c.cases.seed_proposals(case_id, user.uid)
+
+
+@router.post("/cases/{case_id}/proposals")
+def paste_proposal(
+    case_id: str, body: PasteProposalIn, user: User = Depends(current_user), c=Depends(ctx),
+) -> dict:
+    """Paste an untrusted real proposal (max 5). Injection-scanned at evaluate time."""
+    return c.cases.paste_proposal(case_id, user.uid, body.raw_text, body.provider_name)
 
 
 @router.post("/cases/{case_id}/evaluate")

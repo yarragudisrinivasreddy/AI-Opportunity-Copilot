@@ -2,8 +2,11 @@
 .env
 .env.*
 !.env.example
+deploy.env.yaml
 *.pem
 *service-account*.json
+# local scan / tooling downloads
+tmp/
 # python
 __pycache__/
 *.pyc
@@ -27,3 +30,9 @@ frontend/dist/
 tmp/
 eval/results/
 .firebase/
+# prototype scratch (must not ship; delete when unlocked)
+design/
+docs/visual_diff/quota_consumer.json
+docs/visual_diff/quota_raw.json
+docs/visual_diff/gitleaks_workdir.json
+docs/visual_diff/gitleaks_docs.json

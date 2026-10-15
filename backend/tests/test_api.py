@@ -44,10 +44,27 @@ def test_full_happy_path(client, jpeg):
     assert b["data"]["status"] == "proposal_only" and b["data"]["expected_outcomes"]
 
     seeded = client.post(f"/api/cases/{cid}/proposals/seed", headers=ALICE).json()
-    assert len(seeded) == 3 and all(p["simulated"] for p in seeded)
+    assert len(seeded) == 4 and all(p["simulated"] for p in seeded)
+    assert {p["id"] for p in seeded} == {"p_visionworks", "p_leanbuild", "p_docuflow", "p_apexml"}
     ev = client.post(f"/api/cases/{cid}/evaluate", json={}, headers=ALICE).json()["data"]
     assert ev["ranking"][0] == "p_visionworks" and ev["rationale_validated"]
-    assert ev["flags"] == ["injection_flagged:p_apexml"]
+    assert "injection_flagged:p_apexml" in ev["flags"]
+    # Flagged notice must name a provider that is actually flagged in extracted rows.
+    flagged_ids = [e["proposal_id"] for e in ev["extracted"] if e["injection_flag"]["detected"]]
+    assert flagged_ids == ["p_apexml"]
+    flagged_name = next(p.name for p in client.ctx.cases.s.providers if p.id == flagged_ids[0])
+    assert "Apex" in flagged_name
+    # Notice name equals a flagged ranking row (same id appears in ranking + extracted flag).
+    assert flagged_ids[0] in ev["ranking"]
+    # Flagged (steering) bids are capped below every unflagged proposal.
+    clean = [pid for pid in ev["ranking"] if pid not in flagged_ids]
+    flagged_ranks = [ev["ranking"].index(pid) for pid in flagged_ids]
+    assert all(ev["ranking"].index(c) < min(flagged_ranks) for c in clean)
+    assert any("%" in ev["rationale"]["summary"] for _ in [0])  # percentages, not raw 0.80 decimals
+    # Strong seed should score meaningfully on technical fit + experience (facts in raw text).
+    by_id = {s["proposal_id"]: s for s in ev["scores"]}
+    assert by_id["p_visionworks"]["criteria"]["technical_fit"] >= 0.5
+    assert by_id["p_visionworks"]["criteria"]["experience"] >= 0.5
 
     state = client.get(f"/api/cases/{cid}", headers=ALICE).json()
     assert state["case"]["status"] == "evaluated" and "ownerUid" not in state["case"]
@@ -104,7 +121,8 @@ def test_sample_is_public_and_costs_nothing(client):
 def test_unsupported_and_oversize_uploads(client):
     cid = new_case(client)
     assert upload(client, cid, b"GIF89a" + b"0" * 100).status_code == 422
-    assert upload(client, cid, b"x" * (21 * 1024 * 1024)).status_code == 413
+    # Cap is max(photo 8MiB, video 25MiB)=25MiB — 21MiB used to trip 413 when video was 20MiB.
+    assert upload(client, cid, b"x" * (26 * 1024 * 1024)).status_code == 413
     assert upload(client, cid, b"<script>alert(1)</script>", name="evil.jpg").status_code == 422
 
 

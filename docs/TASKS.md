@@ -64,6 +64,20 @@ Dates follow `docs/PRD.md` section 23. Status key: DONE (tested offline), DRAFT 
 ### Fri 16 Oct: **midday hard stop** — merge/promote UX only if clearly better + fully verified; else keep current UI. Then video + deck screenshots from final UI. Benchmarks slot earlier that morning.
 ### Sat 17 Oct: submit in the morning. Sun 18 Oct: buffer only.
 
+## Sample concept illustrations (static, VISUALS_ENABLED=false)
+
+Shipped under `frontend/public/img/concept-opp-{a,b,c}-800.webp` (one per sample opportunity). Caption: **AI-generated example illustration**.
+
+| Field | Value |
+|---|---|
+| Model | `gemini-nano-banana-2.1` |
+| Location | `global` |
+| Per-image cost (list-price estimate) | **~$0.0336** (Image Output $30 / 1M tokens; ~1,120 tokens/image) |
+| Total for 3 images | **~$0.1008** |
+| Sizes | 118,958 / 117,984 / 151,648 bytes (WebP, all &lt; 250 KB) |
+| Prompt rules | no people, no faces, no readable text, no logos |
+| Evidence dump | `docs/visual_diff/sample_concept_images.json` |
+
 ## Open decisions (owner Srinivas unless stated)
 - Teammate (**by 11 Oct**), GCP project/billing, video owner, product name/domain check, theme in portal dropdown, daily case cap value, who ranks proposals.
 

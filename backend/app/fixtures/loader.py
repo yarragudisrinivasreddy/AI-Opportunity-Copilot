@@ -8,19 +8,23 @@ from app.schemas.proposal import Proposal, Provider
 _DIR = Path(__file__).parent
 
 
+def _read_json(name: str) -> object:
+    return json.loads((_DIR / name).read_text(encoding="utf-8"))
+
+
 @lru_cache
 def sample_case() -> dict:
-    return json.loads((_DIR / "sample_case.json").read_text())
+    return _read_json("sample_case.json")  # type: ignore[return-value]
 
 
 @lru_cache
 def providers() -> list[Provider]:
-    return [Provider.model_validate(p) for p in json.loads((_DIR / "providers.json").read_text())]
+    return [Provider.model_validate(p) for p in _read_json("providers.json")]  # type: ignore[arg-type]
 
 
 @lru_cache
 def seeded_proposals() -> dict[str, dict]:
-    raw = json.loads((_DIR / "proposals.json").read_text())
+    raw = _read_json("proposals.json")  # type: ignore[assignment]
     return {
         pid: {"structured": Proposal.model_validate(item["structured"]), "rawText": item["rawText"]}
         for pid, item in raw.items()
