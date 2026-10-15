@@ -98,7 +98,7 @@ def title_card(frames: int, dest: Path) -> None:
     seconds = frames / 30
     vf = (
         f"scale=-2:1080:flags=lanczos,crop=1920:1080:"
-        f"x='min(iw-1920,80+(iw-1920-160)*t/{seconds:.3f})':y=0,fps=30,format=yuv420p"
+        f"x='40+200*t/{seconds:.3f}':y=0,fps=30,format=yuv420p"
     )
     encode(["-loop", "1", "-i", str(HERO)], vf, frames, dest)
 

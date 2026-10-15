@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-15T20:55+05:30",
+  "as_of": "2026-10-16T02:11+05:30",
   "service": "opportunity-copilot-api",
   "region": "us-central1",
   "revision_checked": "opportunity-copilot-api-00030-v8r",
@@ -19,8 +19,9 @@
     "cpu_usd": 47.3,
     "memory_usd": 5.26,
     "total_approx_usd": 52.56,
-    "approx_inr_at_83": 4360,
-    "formula": "730h × 3600 × (1×$0.000018/vCPU-s + 1×$0.000002/GiB-s)"
+    "usd_to_inr": 84,
+    "approx_inr_at_84": 4415,
+    "formula": "730h × 3600 × (1×$0.000018/vCPU-s + 1×$0.000002/GiB-s); INR = USD × 84 (same rate as cost_per_case.json)"
   },
   "recommendation_for_judging_window": {
     "min_instances": 1,

@@ -1,16 +1,16 @@
 {
-  "as_of": "2026-10-15T20:20+05:30",
+  "as_of": "2026-10-16T02:11+05:30",
   "live_url": "https://y-srinivasreddy.web.app",
   "api": "https://opportunity-copilot-api-814609847961.us-central1.run.app",
-  "api_revision": "opportunity-copilot-api-00021-s4s",
+  "api_revision": "opportunity-copilot-api-00030-v8r",
   "caps": {
-    "GLOBAL_DAILY_CASE_CAP": 40,
+    "GLOBAL_DAILY_CASE_CAP": 150,
     "DAILY_CASE_CAP": 3,
     "VISUALS_ENABLED": false,
     "UPLOADS_ENABLED": false,
     "GCP_LOCATION": "global",
     "GEMINI_MODEL": "gemini-2.5-flash",
-    "GEMINI_FALLBACK_MODEL": "gemini-2.0-flash-001"
+    "GEMINI_FALLBACK_MODEL": "gemini-2.5-flash-lite"
   },
   "gates": [
     { "id": "pytest_focused", "status": "PASS", "detail": "test_vertex_backoff + test_evaluator + test_injection_pii (26 tests)" },
@@ -18,7 +18,7 @@
     {
       "id": "e2e",
       "status": "PASS",
-      "detail": "e2e_sample_only + e2e_browser LIVE TEXT FLOW OK on https://y-srinivasreddy.web.app (sample + own-process through evaluate). API revision 00021-s4s with global Gemini + fallback + evaluate max_workers=2."
+      "detail": "e2e_sample_only + e2e_browser LIVE TEXT FLOW OK on https://y-srinivasreddy.web.app (sample + own-process through evaluate). API revision opportunity-copilot-api-00030-v8r with global Gemini + gemini-2.5-flash-lite fallback + evaluate max_workers=2."
     },
     {
       "id": "axe_per_screen_light_dark",
@@ -53,12 +53,12 @@
     {
       "id": "secrets_scan",
       "status": "PASS",
-      "detail": "Prior gitleaks history clean; deploy.env.yaml gitignored; no secrets in docs/ (secrets_scan_report.json)."
+      "detail": "gitleaks history clean after filter-repo; deploy.env.yaml gitignored; no secrets in docs/ (secrets_scan_report.json)."
     },
     {
       "id": "rollback_note",
       "status": "PASS",
-      "detail": "Previous API tip before this session's successful deploy: opportunity-copilot-api-00019-9rs. Hosting live at https://y-srinivasreddy.web.app."
+      "detail": "Live API tip: opportunity-copilot-api-00030-v8r. Hosting live at https://y-srinivasreddy.web.app."
     }
   ]
 }

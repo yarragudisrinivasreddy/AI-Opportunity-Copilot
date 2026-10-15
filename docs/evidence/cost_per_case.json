@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-15T19:50+05:30",
+  "as_of": "2026-10-16T02:11+05:30",
   "source": "Cloud Run logs for successful live case (~13:04Z) + evaluate extracts (~12:39Z); Vertex Gemini 2.5 Flash list prices USD→INR @84",
   "token_usage_one_full_live_case": {
     "analyze_Process": { "in": 462, "out": 1147 },
@@ -26,9 +26,9 @@
   "demo_budget_inr": 2000,
   "cases_affordable_at_budget": 1379,
   "caps_chosen": {
-    "GLOBAL_DAILY_CASE_CAP": 40,
+    "GLOBAL_DAILY_CASE_CAP": 150,
     "DAILY_CASE_CAP": 3,
-    "rationale": "Cost/case is small vs INR 2000; keep GLOBAL=40 as a hard spend + abuse brake (judges share the pool). DAILY=3 so one judge can finish one live run + retries + sample (sample uncapped)."
+    "rationale": "150 cases/day x INR 1.45 = about INR 218/day worst case"
   },
   "billing_page_note": "Cloud Billing console did not expose a per-case SKU line in CLI; estimate is from logged tokens × list price. Reconcile against Billing → Reports filtered to Vertex AI after judging."
 }
