@@ -26,7 +26,7 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp ../.env.example .env
-pytest                                   # 112 tests, fully offline
+pytest                                   # 113 tests, fully offline
 uvicorn app.main:app_factory --factory --port 8080 --reload
 
 # Frontend (separate terminal)
