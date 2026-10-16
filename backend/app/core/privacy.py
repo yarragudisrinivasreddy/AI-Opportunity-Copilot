@@ -186,7 +186,7 @@ def sample_frames(video: bytes, max_frames: int = MAX_FRAMES, max_seconds: int =
 
 # ---- Production implementations (lazy imports; not exercised by offline tests) ----
 class CloudVisionFaceDetector:
-    """Face detection via Cloud Vision. UNVERIFIED against the live API; see docs/TASKS.md."""
+    """Face detection via Cloud Vision. Live Vision path not exercised while uploads are off; see docs/ARCHITECTURE.md."""
 
     def detect(self, jpeg_bytes: bytes) -> list[Box]:
         from google.cloud import vision

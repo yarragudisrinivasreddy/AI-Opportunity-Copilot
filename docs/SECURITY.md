@@ -1,20 +1,20 @@
 # Security
 
-Status of the PRD threat model (section 22). "Verified" means covered by an automated test in this repo.
+Threat model status. "Verified" means covered by an automated test in this repo.
 
 | # | Threat | Control | Status |
 |---|---|---|---|
-| T1 | Account takeover / denial-of-wallet | Firebase Auth anonymous tokens; optional App Check (`ENFORCE_APP_CHECK`); per-UID + **global** daily case caps; per-UID + **per-IP** per-minute limits; set a GCP **budget alert** and Vertex quota before submit | PARTIAL: caps live (`GLOBAL_DAILY_CASE_CAP=40`, IP 60/min); sample never counts and stays public; clear 429 → sample CTA; budget alert `copilot-alert` INR 2000 **emails only (does not stop spend)**; **App Check off** (register → monitor → then enforce); **Vertex quota cap TODO (real brake)** |
+| T1 | Account takeover / denial-of-wallet | Firebase Auth anonymous tokens; optional App Check (`ENFORCE_APP_CHECK`); per-UID + **global** daily case caps; per-UID + **per-IP** per-minute limits; GCP **budget alerts** | PARTIAL: caps live (`GLOBAL_DAILY_CASE_CAP=150, DAILY_CASE_CAP=3`, IP 60/min); sample never counts and stays public; clear 429 → sample CTA; **App Check off** (register → monitor → then enforce); Vertex per-project quota cap NOT set; Gemini uses shared dynamic quota (Google Support case 76520077 open). Spend brakes in place: daily caps 150 global / 3 per user, budget alerts (USD 24, INR 2000; email only). |
 | T2 | Cross-user access | Ownership check on every case route; foreign and missing ids both 404; Firestore deny-all | Verified (`test_other_users_cannot_see_or_touch_a_case`) |
 | T3 | Injection via proposals | Scan + strip, isolated extraction, code scoring, citation validation | Verified on dev attack set; **held-out set needed** |
-| T4 | Injection via text in images/docs | Untrusted-data framing; schema-constrained output | TODO: add red-team images |
-| T5 | Workplace media leaks faces/PII | Sanitise before storage/model; failures reject; EXIF stripped; originals never stored | Verified with fakes; **Cloud Vision/DLP unverified** |
-| T6 | Hallucinated process/brief | Observation vs assumption, evidence refs, human confirmation | Partially verified; brief traceability TODO |
+| T4 | Injection via text in images/docs | Untrusted-data framing; schema-constrained output | Open: red-team images not in this submission |
+| T5 | Workplace media leaks faces/PII | Sanitise before storage/model; failures reject; EXIF stripped; originals never stored | Verified with fakes; **Cloud Vision/DLP unverified on real frames** (uploads off) |
+| T6 | Hallucinated process/brief | Observation vs assumption, evidence refs, human confirmation | Partially verified; brief traceability not fully automated |
 | T7 | Score manipulation | Code scoring | Verified |
 | T8 | Secret leakage | Env/Secret Manager; `.gitignore`; no secrets in prompts/logs | Manual: scan the repo before submission |
-| T9 | Denial of wallet | Daily case cap, per-minute limiter, size caps, free sample case | Partial: budget alert emails only; **set Vertex quota tomorrow morning**; size `GLOBAL_DAILY_CASE_CAP` from E8 $/case vs INR 2000; limiter is per-instance |
+| T9 | Denial of wallet | Daily case cap, per-minute limiter, size caps, free sample case | Partial: Vertex per-project quota cap NOT set; Gemini uses shared dynamic quota (Google Support case 76520077 open). Spend brakes in place: daily caps 150 global / 3 per user, budget alerts (USD 24, INR 2000; email only). Caps sized from `docs/evidence/cost_per_case.json`. Limiter is per-instance. |
 | T10 | Malicious uploads | Magic-byte sniffing, Pillow decode and re-encode, pixel/size caps | Verified |
-| T11 | XSS | React escaping; JSON-only API; CSP in `firebase.json` and API | CSP/console clean on Hosting fresh load + live case (2026-10-07); re-check in real Incognito before submit |
+| T11 | XSS | React escaping; JSON-only API; CSP in `firebase.json` and API | CSP/console clean on Hosting fresh load + live case (2026-10-07) |
 | T12 | Retention/deletion | `DELETE /cases/{id}` removes data and media | Verified (in-memory) |
 | T13 | Unseen access | Audit log + Cloud Audit Logs | Audit verified |
 | T14 | Cross-tenant retrieval | Every query keyed by case id and owner | Verified |

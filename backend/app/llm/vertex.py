@@ -4,7 +4,7 @@ The model ID is NEVER hard-coded; it comes from settings (GEMINI_MODEL).
 Optional GEMINI_FALLBACK_MODEL is tried only after primary retries are exhausted.
 Vertex rejects many JSON-Schema constraint keywords (minLength, maxItems, …) and
 nullable anyOf/$ref shapes. We send a loosened schema to the API and keep full
-Pydantic validation on the response (handoff / TASKS.md).
+Pydantic validation on the response (see docs/ARCHITECTURE.md).
 """
 import copy
 import logging

@@ -1,7 +1,7 @@
 """Firestore and Cloud Storage implementations.
 
-UNVERIFIED against live services in the build container. Verify with the Firestore emulator
-or a dev project before relying on them (docs/TASKS.md). Only sanitised media is ever stored.
+Live Firestore/GCS path is used in production (AUTH/STORE/MEDIA modes). Only sanitised media is ever stored.
+See docs/ARCHITECTURE.md.
 """
 from app.repo.base import Doc
 

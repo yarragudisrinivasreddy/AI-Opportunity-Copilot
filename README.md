@@ -2,7 +2,7 @@
 
 Show us how work is done. We find where AI could help, write a build-ready brief, and compare builder proposals with an injection-resistant evaluator.
 
-Built for the Google Cloud x Hack2skill **AI Builder Cup 2026**. Theme preference: Future of Work (confirm in the portal).
+Built for the Google Cloud x Hack2skill **AI Builder Cup 2026**. Category: Future of Work & Enterprise Productivity.
 
 ## What it does
 
@@ -26,7 +26,7 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp ../.env.example .env
-pytest                                   # 82 tests, fully offline
+pytest                                   # 112 tests, fully offline
 uvicorn app.main:app_factory --factory --port 8080 --reload
 
 # Frontend (separate terminal)

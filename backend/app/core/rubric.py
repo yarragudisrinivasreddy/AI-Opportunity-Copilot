@@ -10,7 +10,7 @@ REC_WEAK = "Not a strong AI candidate"
 REC_RULE_BASED = "Consider a simple rule-based workflow first"
 FLAG_DATA = "Confirm data availability before committing"
 
-# Initial thresholds. Tune on the benchmark and record changes in docs/PRD.md.
+# Initial thresholds. Tune on the benchmark and record changes in docs/ARCHITECTURE.md.
 WEAK_MAX = 7
 CANDIDATE_MAX = 10
 

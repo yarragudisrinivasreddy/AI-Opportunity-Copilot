@@ -1,7 +1,7 @@
 /**
  * Auth headers. With VITE_FIREBASE_* set, signs in anonymously with Firebase and sends the ID token.
  * Without them (local development), sends a stable random X-Dev-User id that the backend accepts
- * only when AUTH_MODE=dev. UNVERIFIED against a live Firebase project; see docs/TASKS.md.
+ * only when AUTH_MODE=dev. Live Firebase anonymous auth is used on Hosting; see docs/ARCHITECTURE.md.
  */
 const cfg = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY as string | undefined,

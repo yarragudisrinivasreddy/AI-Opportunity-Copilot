@@ -28,4 +28,4 @@ Deterministic. Asks only for fields in `process.missing_fields` not yet answered
 5. **Rationale (LLM):** must name the top-ranked proposal; each point's score must match the computed score (tolerance 0.005) and its `field_path` must resolve inside that proposal's extracted data. One retry; then a deterministic template.
 
 ## Changing prompts or formulas
-Update this file and `docs/PRD.md`, run `pytest`, then re-run the relevant benchmark. Never let a model output flow into scoring except through a schema field.
+Update this file and `docs/ARCHITECTURE.md`, run `pytest`, then re-run the relevant benchmark. Never let a model output flow into scoring except through a schema field.
