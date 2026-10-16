@@ -1,0 +1,118 @@
+{
+  "as_of": "2026-10-16T10:21:13+05:30",
+  "base": "https://y-srinivasreddy.web.app",
+  "script": "backend/scripts/e2e_browser.py",
+  "batch_start_ist": "2026-10-16T10:04:04+05:30",
+  "batch_end_ist": "2026-10-16T10:21:13+05:30",
+  "revision_start": "opportunity-copilot-api-00030-v8r",
+  "revision_end": "opportunity-copilot-api-00030-v8r",
+  "revision_unchanged": true,
+  "runs": [
+    {
+      "run": 1,
+      "start_ist": "2026-10-16T10:04:04+05:30",
+      "end_ist": "2026-10-16T10:05:57+05:30",
+      "seconds_total": 112.1,
+      "pass": true,
+      "exit_code": 0,
+      "live_text_flow_ok": true,
+      "e2e_ok": true,
+      "model_last_seen": "gemini-2.5-flash",
+      "models_seen": [
+        "gemini-2.5-flash"
+      ],
+      "fallback_seen": false,
+      "saw_429": false,
+      "saw_503": false,
+      "error": null
+    },
+    {
+      "run": 2,
+      "start_ist": "2026-10-16T10:07:58+05:30",
+      "end_ist": "2026-10-16T10:10:11+05:30",
+      "seconds_total": 133.2,
+      "pass": true,
+      "exit_code": 0,
+      "live_text_flow_ok": true,
+      "e2e_ok": true,
+      "model_last_seen": "gemini-2.5-flash",
+      "models_seen": [
+        "gemini-2.5-flash"
+      ],
+      "fallback_seen": false,
+      "saw_429": false,
+      "saw_503": false,
+      "error": null
+    },
+    {
+      "run": 3,
+      "start_ist": "2026-10-16T10:12:12+05:30",
+      "end_ist": "2026-10-16T10:13:48+05:30",
+      "seconds_total": 96.2,
+      "pass": true,
+      "exit_code": 0,
+      "live_text_flow_ok": true,
+      "e2e_ok": true,
+      "model_last_seen": "gemini-2.5-flash",
+      "models_seen": [
+        "gemini-2.5-flash"
+      ],
+      "fallback_seen": false,
+      "saw_429": false,
+      "saw_503": false,
+      "error": null
+    },
+    {
+      "run": 4,
+      "start_ist": "2026-10-16T10:15:49+05:30",
+      "end_ist": "2026-10-16T10:17:36+05:30",
+      "seconds_total": 106.3,
+      "pass": true,
+      "exit_code": 0,
+      "live_text_flow_ok": true,
+      "e2e_ok": true,
+      "model_last_seen": "gemini-2.5-flash",
+      "models_seen": [
+        "gemini-2.5-flash"
+      ],
+      "fallback_seen": false,
+      "saw_429": false,
+      "saw_503": false,
+      "error": null
+    },
+    {
+      "run": 5,
+      "start_ist": "2026-10-16T10:19:37+05:30",
+      "end_ist": "2026-10-16T10:21:06+05:30",
+      "seconds_total": 88.9,
+      "pass": true,
+      "exit_code": 0,
+      "live_text_flow_ok": true,
+      "e2e_ok": true,
+      "model_last_seen": "gemini-2.5-flash",
+      "models_seen": [
+        "gemini-2.5-flash"
+      ],
+      "fallback_seen": false,
+      "saw_429": false,
+      "saw_503": false,
+      "error": null
+    }
+  ],
+  "summary": {
+    "planned": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "http_5xx_in_window": {
+    "count": 0,
+    "rows": []
+  },
+  "pass_criteria_note": "Pass = e2e_browser.py printed LIVE TEXT FLOW OK and E2E OK (exit 0). That path reaches Compare (evaluation-view); sample path asserts injection-notice; live path asserts compare-mobile/desktop present. Wall seconds include sample + live.",
+  "model_summary": {
+    "primary_only": true,
+    "any_fallback": false,
+    "any_429": false,
+    "any_503": false
+  }
+}
